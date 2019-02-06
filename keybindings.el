@@ -1,4 +1,4 @@
-;;;; package --- Summary: Main initialization for emacs
+;;;; package --- Summary: Keybindings for Emacs
 
 ;;;; Commentary:
 
@@ -9,6 +9,7 @@
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-cb" 'org-switchb)
+
 
 (provide 'keybindings)
 ;;; keybindings.el ends here

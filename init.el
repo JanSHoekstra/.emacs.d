@@ -2,7 +2,7 @@
 
 ;;;; Commentary:
 
-;; Emacs version >= 24 recommended
+;; Emacs version >= 26.1 recommended
 
 ;;;;;;;;;;;;;INITIALIZATION;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -32,10 +32,10 @@
 
 ;;;;;; General UI
 
-(tool-bar-mode 0)                             ; Don't need a toolbar...
+(tool-bar-mode 0)                              ; Don't need a toolbar...
 (define-key menu-bar-tools-menu [games] 0)     ; Remove games menu
 (setq inhibit-startup-message t)               ; No startup message
-(blink-cursor-mode 0)                        ; I'm already agitated enough
+(blink-cursor-mode 0)                          ; I'm already agitated enough
 (cua-mode t)                                   ; Regular classic copy-cut-paste and marking
 (mouse-wheel-mode t)                           ; Mouse wheel enabled
 
@@ -56,7 +56,7 @@
 (defvar show-paren-style)
 
 (setq indent-tabs-mode 0)
-(setq-default c-basic-offset 4)  ;; use 4 spaces as indentation instead of tabs
+(setq-default c-basic-offset 4)                ; use 4 spaces as indentation instead of tabs
 (show-paren-mode t)                            ; Highlight parenthesis pairs
 (setq blink-matching-paren-distance 0)         ; Blinking parenthesis = no
 (setq show-paren-style 'expression)            ; Highlight text between parentheses
@@ -71,7 +71,7 @@
  delete-old-versions t)
 
 ;; Font!
-(set-face-attribute 'default nil :family "FuraCode Nerd Font Mono"  :height 130)
+(set-face-attribute 'default nil :family "Fira Code"  :height 130)
 
 ;;;;;;;;;;;;;FUNCTIONS;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -138,6 +138,9 @@
  '(quote (load-theme (quote rebecca) t))
  '(show-paren-mode t)
  '(tool-bar-mode nil))
+
+; Load org file
+(find-file "~/.emacs.d/todo.org")
 
 (provide 'init)
 ;;; init.el ends here
