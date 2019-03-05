@@ -22,7 +22,7 @@
 ;;;;;;;;;;;;;GLOBAL MODES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (global-aggressive-indent-mode 1) ;; Force those indents hard!
-(powerline-default-theme) ;; bar all the way, at the bottom of the screen 0.0
+(powerline-center-theme) ;; bar all the way, at the bottom of the screen 0.0
 (ivy-mode 1) ;; autocomplete the M-x thingybar stuff
 (ido-mode 1) ;; Even nicer autocomplete stuff
 (global-hl-line-mode t) ; Highlight cursor line
@@ -38,23 +38,21 @@
 (blink-cursor-mode 0)                          ; I'm already agitated enough
 (cua-mode t)                                   ; Regular classic copy-cut-paste and marking
 (mouse-wheel-mode t)                           ; Mouse wheel enabled
+(setq inhibit-compacting-font-caches t)        ; Prevents font caches from being gc'd
 
 ;;;;;; I'm a European, so...
 (defvar european-calendar-style)
 (defvar calendar-week-start-day)
-
 (setq european-calendar-style 't)              ; European style calendar
 (setq calendar-week-start-day 1)               ; Week starts monday
 (setq ps-paper-type 'a4)                       ; Specify printing format
 
 ;;;;;; Files 'n stuff
-
 (setq auto-save-timeout 60)                    ; Autosave every minute
 (setq read-file-name-completion-ignore-case 't); Ignore case when completing file names
 
 ;;;;;; Tabs, spaces, indents, lines, parentheses, etc.
 (defvar show-paren-style)
-
 (setq indent-tabs-mode 0)
 (setq-default c-basic-offset 4)                ; use 4 spaces as indentation instead of tabs
 (show-paren-mode t)                            ; Highlight parenthesis pairs
@@ -71,7 +69,7 @@
  delete-old-versions t)
 
 ;; Font!
-(set-face-attribute 'default nil :family "Fira Code"  :height 130)
+(set-face-attribute 'default nil :family "Fira Code" :height 130)
 
 ;;;;;;;;;;;;;FUNCTIONS;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -119,6 +117,53 @@
         (setq my:theme-window-loaded t)
       (setq my:theme-terminal-loaded t))))
 
+;; Ivy, Counsel, Swiper Setup ;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;
+;;
+(ivy-mode 1) ;; Turn on ivy by default
+(setq ivy-use-virtual-buffers t)  ;; no idea, but recommended by project maintainer
+(setq enable-recursive-minibuffers t) ;; no idea, but recommended by project maintainer
+(setq ivy-count-format "(%d/%d) ")  ;; changes the format of the number of results
+(global-set-key (kbd "C-s") 'swiper)  ;; replaces i-search with swiper
+(global-set-key (kbd "M-x") 'counsel-M-x) ;; Gives M-x command counsel features
+(global-set-key (kbd "C-x C-f") 'counsel-find-file) ;; gives C-x C-f counsel features
+(global-set-key (kbd "<f1> f") 'counsel-describe-function)
+(global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+(global-set-key (kbd "<f1> l") 'counsel-find-library)
+(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+(global-set-key (kbd "C-c C-r") 'ivy-resume)
+
+(global-set-key (kbd "C-c g") 'counsel-git)
+(global-set-key (kbd "C-c j") 'counsel-git-grep)
+(global-set-key (kbd "C-c k") 'counsel-ag) ;; add counsel/ivy features to ag package
+(global-set-key (kbd "C-x l") 'counsel-locate)
+(global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
+;;(define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+
+;;set action options during execution of counsel-find-file
+;; replace "frame" with window to open in new window
+(ivy-set-actions
+ 'counsel-find-file
+ '(("j" find-file-other-frame "other frame")
+   ("b" counsel-find-file-cd-bookmark-action "cd bookmark")
+   ("x" counsel-find-file-extern "open externally")
+   ("d" delete-file "delete")
+   ("r" counsel-find-file-as-root "open as root")))
+
+;; set actions when running C-x b
+;; replace "frame" with window to open in new window
+(ivy-set-actions
+ 'ivy-switch-buffer
+ '(("j" switch-to-buffer-other-frame "other frame")
+   ("k" kill-buffer "kill")
+   ("r" ivy--rename-buffer-action "rename")))
+
+;;
+;;
+;; End Ivy, Swiper, Counsel
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -130,11 +175,11 @@
  '(custom-enabled-themes (quote (rebecca)))
  '(custom-safe-themes
    (quote
-    ("f633d825e380caaaefca46483f7243ae9a663f6df66c5fad66d4cab91f731c86" default)))
+    ("3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "f633d825e380caaaefca46483f7243ae9a663f6df66c5fad66d4cab91f731c86" default)))
  '(font-latex-fontify-script nil)
  '(package-selected-packages
    (quote
-    (yasnippet-snippets adoc-mode ascii company ac-clang auctex-lua dired-sidebar dired-single magit i3wm auctex ac-inf-ruby inf-ruby flymake-ruby flymake-lua flymake symon powerline paredit git-gutter smartparens auto-complete centered-cursor-mode ruby-end haml-mode lua-mode aggressive-indent)))
+    (aggressive-fill-paragraph aggressive-indent doom-modeline spaceline smart-mode-line yasnippet-snippets adoc-mode ascii company ac-clang auctex-lua dired-sidebar dired-single magit i3wm auctex ac-inf-ruby inf-ruby flymake-ruby flymake-lua flymake symon powerline paredit git-gutter smartparens auto-complete centered-cursor-mode ruby-end haml-mode lua-mode)))
  '(quote (load-theme (quote rebecca) t))
  '(show-paren-mode t)
  '(tool-bar-mode nil))
