@@ -52,6 +52,8 @@
 ;;;;;; General UI
 
 (tool-bar-mode 0)                              ; Don't need a toolbar...
+(menu-bar-mode 0)                              ; Let's go clean
+(scroll-bar-mode 0)                            ; Let's go ultra clean
 (define-key menu-bar-tools-menu [games] 0)     ; Remove games menu
 (setq inhibit-startup-message t)               ; No startup message
 (blink-cursor-mode 0)                          ; I'm already agitated enough
@@ -141,8 +143,10 @@
 ;;
 ;;
 (ivy-mode 1) ;; Turn on ivy by default
+(defvar ivy-use-virtual-buffers)
 (setq ivy-use-virtual-buffers t)  ;; no idea, but recommended by project maintainer
 (setq enable-recursive-minibuffers t) ;; no idea, but recommended by project maintainer
+(defvar ivy-count-format)
 (setq ivy-count-format "(%d/%d) ")  ;; changes the format of the number of results
 (global-set-key (kbd "C-s") 'swiper)  ;; replaces i-search with swiper
 (global-set-key (kbd "M-x") 'counsel-M-x) ;; Gives M-x command counsel features

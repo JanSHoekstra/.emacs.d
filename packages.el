@@ -13,14 +13,6 @@
 
 (package-initialize)
 
-;;(unless (assoc-default "melpa" package-archives)
-;;  (add-to-list 'package-archives
-;;'("melpa" . "http://melpa.milkbox.net/packages/"))
-;;	       '("melpa" . "http://melpa.org/packages/")))
-;;(unless (assoc-default "marmalade" package-archives)
-;;(add-to-list 'package-archives
-;;'("marmalade" . "http://marmalade-repo.org/packages/") t))
-
 (unless package-archive-contents
   (package-refresh-contents))
 
@@ -30,7 +22,6 @@
     (package-install package)))
 
 ;;;;;;;;;;;;;PACKAGES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 (defvar to-install)
 (setq to-install
