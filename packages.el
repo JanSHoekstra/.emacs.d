@@ -7,9 +7,7 @@
 ;;;; Code:
 (require 'package)
 
-(setq-default package-archives
-	      '(("melpa" . "http://melpa.org/packages/"),
-		("marmalade" . "http://marmalade-repo.org/packages/")))
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 
 (package-initialize)
 

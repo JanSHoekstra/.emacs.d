@@ -60,6 +60,9 @@
 (cua-mode t)                                   ; Regular classic copy-cut-paste and marking
 (mouse-wheel-mode t)                           ; Mouse wheel enabled
 (setq inhibit-compacting-font-caches t)        ; Prevents font caches from being gc'd
+(setq focus-follows-mouse t)                   ;
+(setq mouse-autoselect-window t)               ; Makes mousefocus act like in Linux X.org
+
 
 ;;;;;; I'm a European, so...
 (defvar european-calendar-style)
