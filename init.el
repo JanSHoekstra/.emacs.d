@@ -6,9 +6,28 @@
 
 ;;;;;;;;;;;;;INITIALIZATION;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Displays message about Emacs startup speed.
+(add-hook 'emacs-startup-hook
+	  (lambda ()
+	    (message "Emacs ready in %s with %d garbage collections."
+		     (format "%.2f seconds"
+			     (float-time
+			      (time-subtract after-init-time before-init-time)))
+		     gcs-done)))
+
+;; Disable special parsing while loading files in the init (tramp etc.)
+(let ((file-name-handler-alist nil)))
+
 ;; reduce the frequency of garbage collection by making it happen on
-;; each 50MB of allocated data (the default is on every 0.76MB)
-(setq gc-cons-threshold 50000000)
+;; each 5MB of allocated data (the default is on every 0.76MB)
+;; Disable it on startup, however.
+(setq gc-cons-threshold most-positive-fixnum
+      gc-cons-percentage 0.6)
+
+(add-hook 'after-init-hook
+	  '(lambda ()
+	     (setq gc-cons-threshold 5000000
+		   gc-cons-percentage 0.1)))
 
 ;; warn when opening files bigger than 100MB
 (setq large-file-warning-threshold 100000000)
@@ -179,7 +198,7 @@
  '(font-latex-fontify-script nil)
  '(package-selected-packages
    (quote
-    (aggressive-fill-paragraph aggressive-indent doom-modeline spaceline smart-mode-line yasnippet-snippets adoc-mode ascii company ac-clang auctex-lua dired-sidebar dired-single magit i3wm auctex ac-inf-ruby inf-ruby flymake-ruby flymake-lua flymake symon powerline paredit git-gutter smartparens auto-complete centered-cursor-mode ruby-end haml-mode lua-mode)))
+    (ocp-indent merlin aggressive-fill-paragraph aggressive-indent doom-modeline spaceline smart-mode-line yasnippet-snippets adoc-mode ascii company ac-clang auctex-lua dired-sidebar dired-single magit i3wm auctex ac-inf-ruby inf-ruby flymake-ruby flymake-lua flymake symon powerline paredit git-gutter smartparens auto-complete centered-cursor-mode ruby-end haml-mode lua-mode)))
  '(quote (load-theme (quote rebecca) t))
  '(show-paren-mode t)
  '(tool-bar-mode nil))

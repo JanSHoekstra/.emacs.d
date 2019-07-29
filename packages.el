@@ -6,14 +6,23 @@
 
 ;;;; Code:
 (require 'package)
+
+(setq-default package-archives
+	      '(("melpa" . "http://melpa.org/packages/"),
+		("marmalade" . "http://marmalade-repo.org/packages/")))
+
 (package-initialize)
 
-(add-to-list 'package-archives
-	     '("melpa" . "http://melpa.milkbox.net/packages/"))
-(add-to-list 'package-archives
-	     '("marmalade" . "http://marmalade-repo.org/packages/") t)
+;;(unless (assoc-default "melpa" package-archives)
+;;  (add-to-list 'package-archives
+;;'("melpa" . "http://melpa.milkbox.net/packages/"))
+;;	       '("melpa" . "http://melpa.org/packages/")))
+;;(unless (assoc-default "marmalade" package-archives)
+;;(add-to-list 'package-archives
+;;'("marmalade" . "http://marmalade-repo.org/packages/") t))
 
-(package-refresh-contents)
+(unless package-archive-contents
+  (package-refresh-contents))
 
 (defun install-if-needed (package)
   "Install PACKAGE if not yet installed."
@@ -51,7 +60,7 @@
 	;;markup langs
 	markdown-mode
 	adoc-mode
-	auctex ;; Much nicer LaTeX support
+	;;auctex ;; Much nicer LaTeX support
 	web-mode
 	emmet-mode
 	
