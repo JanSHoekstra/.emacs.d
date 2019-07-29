@@ -7,7 +7,7 @@
 ;;;; Code:
 (require 'package)
 
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+(setq-default package-archives '(("melpa" . "http://melpa.org/packages/")))
 
 (package-initialize)
 
@@ -36,6 +36,7 @@
 	company	; Code completion, generally better then AC
 	company-c-headers
 	company-web
+	company-quickhelp
 	counsel ; Complete all the things
 	
 	;;paredit ;; May be useful when I program in Clojure or another Lisp again
@@ -55,6 +56,7 @@
 	
 	;; Other langs
 	lua-mode
+	company-lua
 	csharp-mode ;; C#
 	sass-mode
 	tuareg ;; Ocaml tools
