@@ -10,7 +10,8 @@
 (add-hook 'prog-mode-hook 'company-mode)
 (add-hook 'prog-mode-hook 'flycheck-mode)
 (add-hook 'emacs-lisp-mode 'prettify-symbols-mode)
-
+(add-hook 'tuareg-mode-hook 'origami-mode)
+(add-hook 'tuareg-mode-hook 'merlin-mode)
 
 (defvar company-idle-delay)
 (defvar company-minimum-prefix-length)
@@ -19,5 +20,8 @@
 (setq company-minimum-prefix-length 1)
 (setq company-selection-wrap-around t)
 (company-tng-configure-default)
+
+
+
 (provide 'modeConfig)
 ;;; modeConfig.el ends here

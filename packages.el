@@ -25,41 +25,49 @@
 (setq to-install
       '(aggressive-indent
 	rebecca-theme
-	powerline ;; Colorful bar :)
-	ivy ;; Completes me
-	magit ; unused currently
-	projectile
-	dired-sidebar
-	dired-single
-	flycheck
+	powerline ; Colorful bar :)
+	ivy ; Completes me
+	magit ; Unused currently
+	projectile ; Unused
+	dired-sidebar ; Unused
+	dired-single ; Unused
+	flycheck ; Check code while programming
+	origami ; text folding
+	
 	rainbow-delimiters ; WE NEED MORE COLOR!
+	;;color-identifiers ; Colors variables with unique colors
+
 	company	; Code completion, generally better then AC
 	company-c-headers
 	company-web
 	company-quickhelp
 	counsel ; Complete all the things
 	
-	;;paredit ;; May be useful when I program in Clojure or another Lisp again
+	;;paredit ; May be useful when I program in Clojure or another Lisp again
 	;;parinfer
 
 	;; Ruby
-	ruby-end ;; Auto-insert an ending thing to block-stuff in Ruby
-	inf-ruby ;; Provides Ruby REPL
+	ruby-end ; Auto-insert an ending thing to block-stuff in Ruby
+	inf-ruby ; Provides Ruby REPL
 	ac-inf-ruby
+
+	;; Ocaml
+	tuareg
+	merlin
+	utop
 	
 	;;markup langs
 	markdown-mode
 	adoc-mode
-	;;auctex ;; Much nicer LaTeX support
+	;;auctex ; Much nicer LaTeX support, large
 	web-mode
 	emmet-mode
 	
 	;; Other langs
 	lua-mode
 	company-lua
-	csharp-mode ;; C#
+	csharp-mode ; C#
 	sass-mode
-	tuareg ;; Ocaml tools
         ))
 
 (mapc 'install-if-needed to-install)
