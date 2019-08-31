@@ -34,20 +34,24 @@
 
 ;;;; Code:
 (load "~/.emacs.d/packages.el")
+(load "~/.emacs.d/vi.el")
 (load "~/.emacs.d/keybindings.el")
 (load "~/.emacs.d/modeConfig.el")
 (load "~/.emacs.d/org.el")
 
 ;;;;;;;;;;;;;GLOBAL MODES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(global-aggressive-indent-mode 1) ;; Force those indents hard!
+(global-aggressive-indent-mode) ;; Force those indents hard!
 (powerline-center-theme) ;; bar all the way, at the bottom of the screen 0.0
 (global-color-identifiers-mode) ;; Give all the variables COLOR.
 (ivy-mode 1) ;; autocomplete the M-x thingybar stuff
 (ido-mode 1) ;; Even nicer autocomplete stuff
-(global-hl-line-mode t) ; Highlight cursor line
-(electric-pair-mode 1)
-
+(global-hl-line-mode) ; Highlight cursor line
+(electric-pair-mode 1) ; Auto-insert pairs everywhere
+(global-company-mode) ; Autocomplete everywhere
+(global-origami-mode) ; Folding everywhere
+(global-display-line-numbers-mode) ; Line numbers!
+(setq display-line-numbers 'relative) ; For easy jumping with evil
 ;;;;;;;;;;;;;VARIABLES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;; General UI
@@ -57,8 +61,8 @@
 (scroll-bar-mode 0)                            ; Let's go ultra clean
 (define-key menu-bar-tools-menu [games] 0)     ; Remove games menu
 (setq inhibit-startup-message t)               ; No startup message
-(blink-cursor-mode nil)                          ; I'm already agitated enough
-;;(cua-mode t)                                   ; Regular classic copy-cut-paste and marking
+(blink-cursor-mode nil)                        ; I'm already agitated enough
+;;(cua-mode t)                                 ; Regular classic copy-cut-paste and marking
 (mouse-wheel-mode t)                           ; Mouse wheel enabled
 (setq inhibit-compacting-font-caches t)        ; Prevents font caches from being gc'd
 (setq focus-follows-mouse t)                   ;
@@ -151,11 +155,15 @@
 (setq ivy-use-virtual-buffers t)  ;; adds virtual buffers (bookmarks etc.)
 (setq enable-recursive-minibuffers t) ;; no idea, but recommended by project maintainer
 (defvar ivy-re-builders-alist)
-(setq ivy-re-builders-alist '((t . ivy--regex-ignore-order))) ;; ignore order of words in ivy
+(setq ivy-re-builders-alist '((ivy-switch-buffer . ivy--regex-ignore-order)
+			      (t . ivy--regex-fuzzy))) ;; ignore order of words in ivy
 (defvar ivy-count-format)
 (setq ivy-count-format "(%d/%d) ")  ;; changes the format of the number of results
 (defvar ivy-initial-inputs-alist)
 (setq ivy-initial-inputs-alist nil)
+(defvar ivy-height)
+(setq ivy-height 16)
+
 
 (global-set-key (kbd "C-s") 'swiper)  ;; replaces i-search with swiper
 (global-set-key (kbd "M-x") 'counsel-M-x) ;; Gives M-x command counsel features
@@ -209,16 +217,16 @@
    (quote
     ("3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "f633d825e380caaaefca46483f7243ae9a663f6df66c5fad66d4cab91f731c86" default)))
  '(font-latex-fontify-script nil)
- '(org-agenda-files (quote ("~/.emacs.d/todo.org")))
+ '(org-agenda-files (quote ("~/org/todo.org")))
  '(package-selected-packages
    (quote
-    (ivy-omni-org multiple-cursors color-identifiers-mode rainbow-identifiers rainbow-blocks utop origami parrot arduino-mode company-quickhelp ocp-indent merlin aggressive-fill-paragraph aggressive-indent doom-modeline spaceline smart-mode-line yasnippet-snippets adoc-mode ascii company ac-clang auctex-lua dired-sidebar dired-single magit i3wm auctex ac-inf-ruby inf-ruby flymake-ruby flymake-lua flymake symon powerline paredit git-gutter smartparens auto-complete centered-cursor-mode ruby-end haml-mode lua-mode)))
+    (evil-mc smex undo-tree 0blayout org-mind-map evil csv-mode csv ivy-omni-org multiple-cursors color-identifiers-mode rainbow-identifiers rainbow-blocks utop origami parrot arduino-mode company-quickhelp ocp-indent merlin aggressive-fill-paragraph aggressive-indent doom-modeline spaceline smart-mode-line yasnippet-snippets adoc-mode ascii company ac-clang auctex-lua dired-sidebar dired-single magit i3wm auctex ac-inf-ruby inf-ruby flymake-ruby flymake-lua flymake symon powerline paredit git-gutter smartparens auto-complete centered-cursor-mode ruby-end haml-mode lua-mode)))
  '(quote (load-theme (quote rebecca) t))
  '(show-paren-mode t)
  '(tool-bar-mode nil))
 
 ; Load org file
-(find-file "~/.emacs.d/todo.org")
+(find-file "~/org/todo.org")
 
 (provide 'init)
 ;;; init.el ends here

@@ -21,7 +21,5 @@
 (setq company-selection-wrap-around t)
 (company-tng-configure-default)
 
-
-
 (provide 'modeConfig)
 ;;; modeConfig.el ends here
