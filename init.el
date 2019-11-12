@@ -98,7 +98,7 @@
  delete-old-versions t)
 
 ;; Font!
-(set-face-attribute 'default nil :family "Fira Code" :height 130)
+(set-face-attribute 'default nil :family "Fira Code" :height 120)
 
 ;;;;;;;;;;;;;FUNCTIONS;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -210,6 +210,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default default default italic underline success warning error])
  '(blink-cursor-mode nil)
  '(cua-mode nil nil (cua-base))
  '(custom-enabled-themes (quote (rebecca)))
@@ -220,7 +222,7 @@
  '(org-agenda-files (quote ("~/org/todo.org")))
  '(package-selected-packages
    (quote
-    (evil-mc smex undo-tree 0blayout org-mind-map evil csv-mode csv ivy-omni-org multiple-cursors color-identifiers-mode rainbow-identifiers rainbow-blocks utop origami parrot arduino-mode company-quickhelp ocp-indent merlin aggressive-fill-paragraph aggressive-indent doom-modeline spaceline smart-mode-line yasnippet-snippets adoc-mode ascii company ac-clang auctex-lua dired-sidebar dired-single magit i3wm auctex ac-inf-ruby inf-ruby flymake-ruby flymake-lua flymake symon powerline paredit git-gutter smartparens auto-complete centered-cursor-mode ruby-end haml-mode lua-mode)))
+    (irony cmake-ide modern-cpp-font-lock paper-theme quack scheme-complete geiser slime chicken-scheme graphviz-dot-mode evil-vimish-fold js2-mode haskell-mode evil-mc smex undo-tree 0blayout org-mind-map evil csv-mode csv ivy-omni-org multiple-cursors color-identifiers-mode rainbow-identifiers rainbow-blocks utop origami parrot arduino-mode company-quickhelp ocp-indent merlin aggressive-fill-paragraph aggressive-indent doom-modeline spaceline smart-mode-line yasnippet-snippets adoc-mode ascii company ac-clang auctex-lua dired-sidebar dired-single magit i3wm auctex ac-inf-ruby inf-ruby flymake-ruby flymake-lua flymake symon powerline paredit git-gutter smartparens auto-complete centered-cursor-mode ruby-end haml-mode lua-mode)))
  '(quote (load-theme (quote rebecca) t))
  '(show-paren-mode t)
  '(tool-bar-mode nil))

@@ -21,5 +21,17 @@
 (setq company-selection-wrap-around t)
 (company-tng-configure-default)
 
+;; Disable annoying buffer pop-up.
+(defvar haskell-interactive-popup-errors)
+(setq haskell-interactive-popup-errors nil)
+
+(defvar scheme-program-name)
+(setq scheme-program-name "csi -:c")
+
+;; C++
+(defvar flycheck-clang-language-standard)
+(add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++17")))
+
+
 (provide 'modeConfig)
 ;;; modeConfig.el ends here
