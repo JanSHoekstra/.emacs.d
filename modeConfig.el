@@ -32,6 +32,9 @@
 (defvar flycheck-clang-language-standard)
 (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++17")))
 
+;; Also complete headers in C/C++, please.
+(defvar company-backends)
+(add-to-list 'company-backends 'company-c-headers)
 
 (provide 'modeConfig)
 ;;; modeConfig.el ends here

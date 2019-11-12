@@ -40,7 +40,7 @@
 (load "~/.emacs.d/org.el")
 
 ;;;;;;;;;;;;;GLOBAL MODES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+(rainbow-delimiters-mode-enable)
 (global-aggressive-indent-mode) ;; Force those indents hard!
 (powerline-center-theme) ;; bar all the way, at the bottom of the screen 0.0
 (global-color-identifiers-mode) ;; Give all the variables COLOR.
@@ -61,7 +61,7 @@
 (scroll-bar-mode 0)                            ; Let's go ultra clean
 (define-key menu-bar-tools-menu [games] 0)     ; Remove games menu
 (setq inhibit-startup-message t)               ; No startup message
-(blink-cursor-mode nil)                        ; I'm already agitated enough
+(blink-cursor-mode 0)                        ; I'm already agitated enough
 ;;(cua-mode t)                                 ; Regular classic copy-cut-paste and marking
 (mouse-wheel-mode t)                           ; Mouse wheel enabled
 (setq inhibit-compacting-font-caches t)        ; Prevents font caches from being gc'd
@@ -164,7 +164,6 @@
 (defvar ivy-height)
 (setq ivy-height 16)
 
-
 (global-set-key (kbd "C-s") 'swiper)  ;; replaces i-search with swiper
 (global-set-key (kbd "M-x") 'counsel-M-x) ;; Gives M-x command counsel features
 (global-set-key (kbd "C-x C-f") 'counsel-find-file) ;; gives C-x C-f counsel features
@@ -204,6 +203,18 @@
 ;;
 ;; End Ivy, Swiper, Counsel
 
+(load-theme 'rebecca t)
+
+(set-face-foreground 'rainbow-delimiters-depth-1-face "deep sky blue")
+(set-face-foreground 'rainbow-delimiters-depth-2-face "deep pink")
+(set-face-foreground 'rainbow-delimiters-depth-3-face "dark orange")
+(set-face-foreground 'rainbow-delimiters-depth-4-face "yellow")
+(set-face-foreground 'rainbow-delimiters-depth-5-face "cyan")
+(set-face-foreground 'rainbow-delimiters-depth-6-face "magenta")
+(set-face-foreground 'rainbow-delimiters-depth-7-face "plum")
+(set-face-foreground 'rainbow-delimiters-depth-8-face "DarkslateGray1")
+(set-face-foreground 'rainbow-delimiters-depth-9-face "gold")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -212,29 +223,15 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-faces-vector
    [default default default italic underline success warning error])
- '(blink-cursor-mode nil)
- '(cua-mode nil nil (cua-base))
- '(custom-enabled-themes (quote (rebecca)))
- '(custom-safe-themes
-   (quote
-    ("3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "f633d825e380caaaefca46483f7243ae9a663f6df66c5fad66d4cab91f731c86" default)))
  '(font-latex-fontify-script nil)
  '(org-agenda-files (quote ("~/org/todo.org")))
  '(package-selected-packages
    (quote
     (irony cmake-ide modern-cpp-font-lock paper-theme quack scheme-complete geiser slime chicken-scheme graphviz-dot-mode evil-vimish-fold js2-mode haskell-mode evil-mc smex undo-tree 0blayout org-mind-map evil csv-mode csv ivy-omni-org multiple-cursors color-identifiers-mode rainbow-identifiers rainbow-blocks utop origami parrot arduino-mode company-quickhelp ocp-indent merlin aggressive-fill-paragraph aggressive-indent doom-modeline spaceline smart-mode-line yasnippet-snippets adoc-mode ascii company ac-clang auctex-lua dired-sidebar dired-single magit i3wm auctex ac-inf-ruby inf-ruby flymake-ruby flymake-lua flymake symon powerline paredit git-gutter smartparens auto-complete centered-cursor-mode ruby-end haml-mode lua-mode)))
- '(quote (load-theme (quote rebecca) t))
- '(show-paren-mode t)
- '(tool-bar-mode nil))
-
+ ;;'(tool-bar-mode nil))
+ )
 ; Load org file
 (find-file "~/org/todo.org")
 
 (provide 'init)
 ;;; init.el ends here
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
