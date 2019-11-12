@@ -33,14 +33,16 @@
 (setq large-file-warning-threshold 10000000)
 
 ;;;; Code:
+(setq custom-file "~/.emacs.d/custom.el")
 (load "~/.emacs.d/packages.el")
+(load custom-file)
 (load "~/.emacs.d/vi.el")
 (load "~/.emacs.d/keybindings.el")
 (load "~/.emacs.d/modeConfig.el")
 (load "~/.emacs.d/org.el")
 
 ;;;;;;;;;;;;;GLOBAL MODES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(rainbow-delimiters-mode-enable)
+(rainbow-delimiters-mode-enable) ;; We need to know what belongs to who
 (global-aggressive-indent-mode) ;; Force those indents hard!
 (powerline-center-theme) ;; bar all the way, at the bottom of the screen 0.0
 (global-color-identifiers-mode) ;; Give all the variables COLOR.
@@ -62,7 +64,6 @@
 (define-key menu-bar-tools-menu [games] 0)     ; Remove games menu
 (setq inhibit-startup-message t)               ; No startup message
 (blink-cursor-mode 0)                        ; I'm already agitated enough
-;;(cua-mode t)                                 ; Regular classic copy-cut-paste and marking
 (mouse-wheel-mode t)                           ; Mouse wheel enabled
 (setq inhibit-compacting-font-caches t)        ; Prevents font caches from being gc'd
 (setq focus-follows-mouse t)                   ;
@@ -206,14 +207,12 @@
 (load-theme 'rebecca t)
 
 (set-face-foreground 'rainbow-delimiters-depth-1-face "deep sky blue")
-(set-face-foreground 'rainbow-delimiters-depth-2-face "deep pink")
-(set-face-foreground 'rainbow-delimiters-depth-3-face "dark orange")
-(set-face-foreground 'rainbow-delimiters-depth-4-face "yellow")
-(set-face-foreground 'rainbow-delimiters-depth-5-face "cyan")
-(set-face-foreground 'rainbow-delimiters-depth-6-face "magenta")
-(set-face-foreground 'rainbow-delimiters-depth-7-face "plum")
-(set-face-foreground 'rainbow-delimiters-depth-8-face "DarkslateGray1")
-(set-face-foreground 'rainbow-delimiters-depth-9-face "gold")
+(set-face-foreground 'rainbow-delimiters-depth-2-face "magenta1")
+(set-face-foreground 'rainbow-delimiters-depth-3-face "turquoise1")
+(set-face-foreground 'rainbow-delimiters-depth-4-face "dark orange")
+
+(defvar rainbow-delimiters-max-face-count)
+(setq rainbow-delimiters-max-face-count 4)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (custom-set-variables
@@ -225,10 +224,6 @@
    [default default default italic underline success warning error])
  '(font-latex-fontify-script nil)
  '(org-agenda-files (quote ("~/org/todo.org")))
- '(package-selected-packages
-   (quote
-    (irony cmake-ide modern-cpp-font-lock paper-theme quack scheme-complete geiser slime chicken-scheme graphviz-dot-mode evil-vimish-fold js2-mode haskell-mode evil-mc smex undo-tree 0blayout org-mind-map evil csv-mode csv ivy-omni-org multiple-cursors color-identifiers-mode rainbow-identifiers rainbow-blocks utop origami parrot arduino-mode company-quickhelp ocp-indent merlin aggressive-fill-paragraph aggressive-indent doom-modeline spaceline smart-mode-line yasnippet-snippets adoc-mode ascii company ac-clang auctex-lua dired-sidebar dired-single magit i3wm auctex ac-inf-ruby inf-ruby flymake-ruby flymake-lua flymake symon powerline paredit git-gutter smartparens auto-complete centered-cursor-mode ruby-end haml-mode lua-mode)))
- ;;'(tool-bar-mode nil))
  )
 ; Load org file
 (find-file "~/org/todo.org")
