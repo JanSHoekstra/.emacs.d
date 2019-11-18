@@ -41,6 +41,13 @@
 (load "~/.emacs.d/modeConfig.el")
 (load "~/.emacs.d/org.el")
 
+(defmacro defset (js-name js-definition)
+  "Defvar and setq in one.
+JS-NAME is the variable and
+JS-DEFINITION is the inputted value."
+  (defvar js-name)
+  (setq js-name js-definition))
+
 ;;;;;;;;;;;;;GLOBAL MODES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (rainbow-delimiters-mode-enable) ;; We need to know what belongs to who
 (global-aggressive-indent-mode) ;; Force those indents hard!
@@ -71,10 +78,8 @@
 (setq ring-bell-function 'ignore)              ; Do not make annoying noises
 
 ;;;;;; I'm a European, so...
-(defvar european-calendar-style)
-(defvar calendar-week-start-day)
-(setq european-calendar-style 't)              ; European style calendar
-(setq calendar-week-start-day 1)               ; Week starts monday
+(defset european-calendar-style 't)
+(defset calendar-week-start-day 1)
 (setq ps-paper-type 'a4)                       ; Specify printing format
 
 ;;;;;; Files 'n stuff
@@ -82,12 +87,11 @@
 (setq read-file-name-completion-ignore-case 't); Ignore case when completing file names
 
 ;;;;;; Tabs, spaces, indents, lines, parentheses, etc.
-(defvar show-paren-style)
 (setq indent-tabs-mode 0)
-(setq-default c-basic-offset 4)                ; use 4 spaces as indentation instead of tabs
+(setq-default c-basic-offset 4)                ; use 4 spaces as indentation
 (show-paren-mode t)                            ; Highlight parenthesis pairs
 (setq blink-matching-paren-distance 0)         ; Blinking parenthesis = no
-(setq show-paren-style 'expression)            ; Highlight text between parentheses
+(defset show-paren-style 'expression)          ; Highlight text between parentheses
 
 ;; No stupid backup/temporary files in every folder, but in a dedicated one
 (setq
@@ -104,24 +108,25 @@
 ;;;;;;;;;;;;;FUNCTIONS;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun vsplit-last-buffer ()
-  "When opening a new split, open previous buffer instead of 2 identical ones.  Vertically."
+  "When opening a new split, open previous buffer.
+Instead of 2 identical ones.  Vertically."
   (interactive)
   (split-window-vertically)
   (other-window 1 nil)
-  (switch-to-next-buffer)
-  )
+  (switch-to-next-buffer))
+
 (defun hsplit-last-buffer ()
-  "When opening a new split, open previous buffer instead of 2 identical ones.  Horizontally."
+  "When opening a new split, open previous buffer.
+Instead of 2 identical ones.  Horizontally."
   (interactive)
   (split-window-horizontally)
   (other-window 1 nil)
-  (switch-to-next-buffer)
-  )
+  (switch-to-next-buffer))
 
 (global-set-key (kbd "C-x 2") 'vsplit-last-buffer)
 (global-set-key (kbd "C-x 3") 'hsplit-last-buffer)
 
-;; Weird theme workaround
+;; Weird theme workaround (for running in server mode)
 (defvar my:theme 'rebecca)
 (defvar my:theme-window-loaded nil)
 (defvar my:theme-terminal-loaded nil)
@@ -148,22 +153,14 @@
       (setq my:theme-terminal-loaded t))))
 
 ;; Ivy, Counsel, Swiper Setup ;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;
-;;
 (ivy-mode 1) ;; Turn on ivy by default
-(defvar ivy-use-virtual-buffers)
-(setq ivy-use-virtual-buffers t)  ;; adds virtual buffers (bookmarks etc.)
+(defset ivy-use-virtual-buffers t)  ;; adds virtual buffers (bookmarks etc.)
 (setq enable-recursive-minibuffers t) ;; no idea, but recommended by project maintainer
-(defvar ivy-re-builders-alist)
-(setq ivy-re-builders-alist '((ivy-switch-buffer . ivy--regex-ignore-order)
-			      (t . ivy--regex-fuzzy))) ;; ignore order of words in ivy
-(defvar ivy-count-format)
-(setq ivy-count-format "(%d/%d) ")  ;; changes the format of the number of results
-(defvar ivy-initial-inputs-alist)
-(setq ivy-initial-inputs-alist nil)
-(defvar ivy-height)
-(setq ivy-height 16)
+(defset ivy-re-builders-alist '((ivy-switch-buffer . ivy--regex-ignore-order)
+				(t . ivy--regex-fuzzy))) ;; ignore order of words in ivy
+(defset ivy-count-format "(%d/%d) ")  ;; changes the format of the number of results
+(defset ivy-initial-inputs-alist nil)
+(defset ivy-height 16)
 
 (global-set-key (kbd "C-s") 'swiper)  ;; replaces i-search with swiper
 (global-set-key (kbd "M-x") 'counsel-M-x) ;; Gives M-x command counsel features
@@ -200,32 +197,32 @@
    ("k" kill-buffer "kill")
    ("r" ivy--rename-buffer-action "rename")))
 
-;;
-;;
-;; End Ivy, Swiper, Counsel
-
+;; Theming
 (load-theme 'rebecca t)
 
 (set-face-foreground 'rainbow-delimiters-depth-1-face "deep sky blue")
 (set-face-foreground 'rainbow-delimiters-depth-2-face "magenta1")
 (set-face-foreground 'rainbow-delimiters-depth-3-face "turquoise1")
 (set-face-foreground 'rainbow-delimiters-depth-4-face "dark orange")
+(defset rainbow-delimiters-max-face-count 4)
 
-(defvar rainbow-delimiters-max-face-count)
-(setq rainbow-delimiters-max-face-count 4)
+(global-set-key '[f5] 'org-capture)
+(global-set-key '[f6] (lambda () (interactive)(find-file "~/org/inbox.org")))
+;;(global-set-key '[f7] 'org-capture)
+;;(global-set-key '[f8] 'org-capture)
+;;(global-set-key '[f9] 'org-capture)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default default default italic underline success warning error])
- '(font-latex-fontify-script nil)
- '(org-agenda-files (quote ("~/org/todo.org")))
- )
-; Load org file
+;;(custom-set-variables
+;; custom-set-variables was added by Custom.
+;; If you edit it by hand, you could mess it up, so be careful.
+;; Your init file should contain only one such instance.
+;; If there is more than one, they won't work right.
+;; '(ansi-color-faces-vector
+;;   [default default default italic underline success warning error])
+;; '(font-latex-fontify-script nil)
+;; )
+;; Load org file
 (find-file "~/org/todo.org")
 
 (provide 'init)

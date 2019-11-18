@@ -36,9 +36,6 @@
 (defvar to-install)
 (setq to-install
       '(
-	
-	
-
 	;; Color related
 	rebecca-theme
 	powerline ; Colorful bar :)
@@ -54,14 +51,11 @@
 	smex ; better m-x, used by Ivy
 	flx ; used by ivy
 
-
 	magit ; Unused currently
 	projectile ; Unused
 	dired-sidebar ; Unused
 	dired-single ; Unused
 
-
-	
 	company	; Code completion, generally better then AC
 	company-c-headers
 	company-web
@@ -96,13 +90,6 @@
         ))
 
 (mapc 'install-if-needed to-install)
-
-(defun tuareg-abbrev-hook ()
-  "Prevents error in Tuareg."
-  ())
-
-(defvar flycheck-emacs-lisp-executable)
-(set 'flycheck-emacs-lisp-executable "emacs")
 
 (provide 'packages)
 ;;; packages.el ends here
