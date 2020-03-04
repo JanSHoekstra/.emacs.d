@@ -1,18 +1,11 @@
 ;;; package --- Summary: contains mode configuration.
 ;;; Commentary:
 ;;; Code:
-(defmacro defset (js-name js-definition)
-  "Defvar and setq in one.
-JS-NAME is the variable and
-JS-DEFINITION is the inputted value."
-  (defvar js-name)
-  (setq js-name js-definition))
-
 (defun tuareg-abbrev-hook ()
   "Prevents error in Tuareg."
   ())
 
-(defset 'flycheck-emacs-lisp-executable "emacs")
+(defvar flycheck-emacs-lisp-executable "emacs")
 
 (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
 (add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
@@ -26,26 +19,28 @@ JS-DEFINITION is the inputted value."
 (add-hook 'tuareg-mode-hook 'origami-mode)
 (add-hook 'tuareg-mode-hook 'merlin-mode)
 
-(defset company-idle-delay 0)
-(defset company-minimum-prefix-length 1)
-(defset company-selection-wrap-around t)
+(defvar company-idle-delay 0)
+(defvar company-minimum-prefix-length 1)
+(defvar company-selection-wrap-around t)
 (company-tng-configure-default)
 
 ;; Disable annoying buffer pop-up.
-(defset haskell-interactive-popup-errors nil)
-(defset scheme-program-name "csi -:c")
-(defset geiser-default-implementation "chicken")
+(defvar haskell-interactive-popup-errors nil)
+(defvar scheme-program-name "csi -:c")
+(defvar geiser-default-implementation "chicken")
 
 ;; C++
-(defvar flycheck-clang-language-standard)
-(add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++17")))
+(add-hook 'c++-mode-hook (lambda () (defvar flycheck-clang-language-standard "c++17")))
 
 ;; Also complete headers in C/C++, please.
 (defvar company-backends)
 (add-to-list 'company-backends 'company-c-headers)
 
-(defset c-default-style "bsd")
-(defset c-basic-offset 4)
+;;(defvar c-default-style '(("c++" . "linux")
+;;(java-mode . "java")
+;;(awk-mode . "awk")
+;;(other . "linux")))
+;;(defvar c-basic-offset 4)
 
 (provide 'modeConfig)
 ;;; modeConfig.el ends here
