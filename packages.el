@@ -77,7 +77,6 @@
 	
 	;;markup langs
 	markdown-mode
-	adoc-mode
 	;; auctex ; Much nicer LaTeX support, large
 	web-mode
 	;; emmet-mode ; Don't really use this
