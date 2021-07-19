@@ -21,7 +21,7 @@ JS-DEFINITION is the inputted value."
 ;;;; Agenda
 (defset org-agenda-files '("~/org/todo.org"))
 ;; Start agenda files at Emacs start
-(org-agenda nil "a")
+;(org-agenda nil "a")
 ;; Start agenda on today
 (defset org-agenda-start-on-weekday nil)
 (defset org-agenda-span 10)

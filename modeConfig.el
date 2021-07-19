@@ -22,7 +22,8 @@
 (defvar company-idle-delay 0)
 (defvar company-minimum-prefix-length 1)
 (defvar company-selection-wrap-around t)
-(company-tng-configure-default)
+;;(company-tng-configure-default)
+(defvar evil-collection-company-use-tng nil)
 
 ;; Disable annoying buffer pop-up.
 (defvar haskell-interactive-popup-errors nil)
@@ -31,10 +32,14 @@
 
 ;; C++
 (add-hook 'c++-mode-hook (lambda () (defvar flycheck-clang-language-standard "c++17")))
+;;(add-hook 'c++-mode-hook (lambda ()
+;;			   (set (make-local-variable 'company-backends) '(company-clang))))
+;;(add-hook 'elisp-mode (lambda ()
+;;			(set (make-local-variable 'company-backends) '(company-capf))))
 
 ;; Also complete headers in C/C++, please.
-(defvar company-backends)
-(add-to-list 'company-backends 'company-c-headers)
+;;(defvar company-backends)
+;;(add-to-list 'company-backends 'company-c-headers)
 
 ;;(defvar c-default-style '(("c++" . "linux")
 ;;(java-mode . "java")

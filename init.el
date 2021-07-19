@@ -40,6 +40,7 @@
 (load "~/.emacs.d/keybindings.el")
 (load "~/.emacs.d/modeConfig.el")
 (load "~/.emacs.d/org.el")
+(load "~/.emacs.d/eshell.el")
 
 (defmacro defset (js-name js-definition)
   "Defvar and setq in one.
@@ -61,6 +62,11 @@ JS-DEFINITION is the inputted value."
 (global-origami-mode) ; Folding everywhere
 (global-display-line-numbers-mode) ; Line numbers!
 (setq display-line-numbers 'relative) ; For easy jumping with evil
+
+					;(require 'semantic)
+					;(global-semanticdb-minor-mode 1)
+					;(global-semantic-idle-scheduler-mode 1)
+					;(semantic-mode 1)
 ;;;;;;;;;;;;;VARIABLES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;; General UI
@@ -92,6 +98,7 @@ JS-DEFINITION is the inputted value."
 (show-paren-mode t)                            ; Highlight parenthesis pairs
 (setq blink-matching-paren-distance 0)         ; Blinking parenthesis = no
 (defset show-paren-style 'expression)          ; Highlight text between parentheses
+(set-default 'truncate-lines 0)
 
 ;; No stupid backup/temporary files in every folder, but in a dedicated one
 (setq
@@ -198,7 +205,7 @@ Instead of 2 identical ones.  Horizontally."
    ("r" ivy--rename-buffer-action "rename")))
 
 ;; Theming
-(load-theme 'rebecca t)
+;(load-theme 'rebecca t)
 
 (set-face-foreground 'rainbow-delimiters-depth-1-face "deep sky blue")
 (set-face-foreground 'rainbow-delimiters-depth-2-face "magenta1")
@@ -206,24 +213,13 @@ Instead of 2 identical ones.  Horizontally."
 (set-face-foreground 'rainbow-delimiters-depth-4-face "dark orange")
 (defset rainbow-delimiters-max-face-count 4)
 
-(global-set-key '[f5] 'org-capture)
-(global-set-key '[f6] (lambda () (interactive)(find-file "~/org/inbox.org")))
+;;(global-set-key '[f5] 'org-capture)
+;;(global-set-key '[f6] (lambda () (interactive)(find-file "~/org/inbox.org")))
 ;;(global-set-key '[f7] 'org-capture)
 ;;(global-set-key '[f8] 'org-capture)
 ;;(global-set-key '[f9] 'org-capture)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;(custom-set-variables
-;; custom-set-variables was added by Custom.
-;; If you edit it by hand, you could mess it up, so be careful.
-;; Your init file should contain only one such instance.
-;; If there is more than one, they won't work right.
-;; '(ansi-color-faces-vector
-;;   [default default default italic underline success warning error])
-;; '(font-latex-fontify-script nil)
-;; )
 ;; Load org file
-(find-file "~/org/todo.org")
+;;(find-file "~/org/todo.org")
 
 (provide 'init)
 ;;; init.el ends here
