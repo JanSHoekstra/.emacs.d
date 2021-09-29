@@ -1,23 +1,41 @@
-;;; package --- Summary
+;;; config.el --- Jan Hoekstra's Emacs Setup  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
+;; This file includes my configuration, divided per package.
 
 ;;; Code:
 
 (use-package emacs
   :ensure nil
   :config
+
+  ;; Disable UI nonsense.
   (tool-bar-mode 0)
   (menu-bar-mode 0)
   (blink-cursor-mode 0)
 
+  (setq
+   ;; No need for the default startup screen.
+   inhibit-startup-screen t
+   ;; I'd like my scratch clean, please.
+   initial-scratch-message nil
+   ;; No annoying, distracting noises.
+   ring-bell-function 'ignore
+   )
+
   (setq-default indent-tabs-mode 0
 				tab-width 4
 				truncate-lines 1
-				truncate-partial-width-windows 1)
+				truncate-partial-width-windows 1))
 
-  (setq ring-bell-function 'ignore)
-  )
+(use-package challenger-deep-theme :config (load-theme 'challenger-deep 't))
+
+;; Themes like to reset font configuration,
+;; So load fonts afterwards.
+(use-package emacs
+  :config
+  (set-face-attribute 'default nil :family "iA Writer Mono V")
+  (set-face-attribute 'mode-line nil :family "iA Writer Quattro V" ))
 
 (use-package scroll-bar
   :ensure nil
@@ -42,23 +60,30 @@
   :ensure nil
   :hook (before-save . whitespace-cleanup))
 
-;; Delete intermediate buffers when navigating through dired.
 (use-package dired
   :ensure nil
   :config
+;; Delete intermediate buffers when navigating through dired.
   (setq delete-by-moving-to-trash t)
-  (eval-after-load "dired"
-	#'(lambda ()
-		(put 'dired-find-alternate-file 'disabled nil)
-		(define-key dired-mode-map (kbd "RET") #'dired-find-alternate-file))))
+  (put 'dired-find-alternate-file 'disabled nil)
+  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
+
+(use-package org
+  :ensure nil
+  :config
+  (add-hook 'org-mode-hook (lambda ()
+							(defvar buffer-face-mode-face '(:family "iA Writer Quattro V"))
+							(buffer-face-mode))))
 
 (use-package ido
+  :ensure nil
   :config
   (ido-mode +1)
   (setq ido-everywhere t
 		ido-enable-flex-matching t))
 
 (use-package ido-vertical-mode
+  :ensure nil
   :config
   (ido-vertical-mode +1)
   (setq ido-vertical-define-keys 'C-n-C-p-up-and-down))
@@ -80,8 +105,6 @@
   (define-key company-active-map (kbd "C-p") 'company-select-previous))
 
 (use-package flycheck :config (global-flycheck-mode +1))
-
-(use-package challenger-deep-theme :config (load-theme 'challenger-deep 't))
 
 (use-package projectile
   :hook (prog-mode . projectile-mode)

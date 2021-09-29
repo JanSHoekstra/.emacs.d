@@ -1,3 +1,5 @@
+(setq lexical-binding t)
+(setq gc-cons-threshold 100000000)
 (setq custom-file "/tmp/emacs.custom.el")
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")))
