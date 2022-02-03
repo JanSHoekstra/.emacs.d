@@ -5,6 +5,8 @@
 
 ;;; Code:
 
+(load "~/.emacs.d/splash")
+
 (use-package emacs
   :ensure nil
   :config
@@ -72,8 +74,8 @@
   :ensure nil
   :config
   (add-hook 'org-mode-hook (lambda ()
-							(defvar buffer-face-mode-face '(:family "iA Writer Quattro V"))
-							(buffer-face-mode))))
+							 (defvar buffer-face-mode-face '(:family "iA Writer Quattro V"))
+							 (buffer-face-mode))))
 
 (use-package ido
   :ensure nil
@@ -115,6 +117,15 @@
 
 (use-package centered-cursor-mode
   :hook (prog-mode . centered-cursor-mode))
+
+(use-package viper
+  :ensure nil
+  :init
+  (setq viper-minibuffer-vi-face nil
+		viper-minibuffer-emacs-face nil
+		viper-minibuffer-insert-face nil)
+  (setq viper-mode t)
+  )
 
 (provide 'config)
 ;;; config.el ends here
