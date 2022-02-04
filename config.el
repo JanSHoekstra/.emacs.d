@@ -125,6 +125,8 @@
 		viper-minibuffer-emacs-face nil
 		viper-minibuffer-insert-face nil)
   (setq viper-mode t)
+  (setq viper-inhibit-startup-message 't)
+  (setq viper-expert-level '5)
   )
 
 (provide 'config)
