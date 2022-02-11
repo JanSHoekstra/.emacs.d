@@ -36,8 +36,12 @@
 ;; So load fonts afterwards.
 (use-package emacs
   :config
-  (set-face-attribute 'default nil :family "iA Writer Mono V")
-  (set-face-attribute 'mode-line nil :family "iA Writer Quattro V" ))
+  (if (eq system-type 'gnu/linux)
+	  (progn
+		(set-face-attribute 'default nil :family "iA Writer Mono V")
+		(set-face-attribute 'mode-line nil :family "iA Writer Quattro V")))
+  (tooltip-mode 0)
+)
 
 (use-package scroll-bar
   :ensure nil
