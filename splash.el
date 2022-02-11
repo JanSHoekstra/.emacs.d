@@ -31,7 +31,7 @@
 	  ;; Vertical center
 	  (insert-char ?\n (floor (/ (window-total-height nil 'floor) 2)))
 	  ;; Insert cool splash text.
-	  (insert (concat "Hello, " (getenv "USER") "!\n"))
+	  (insert (concat "Hello, " (or user-full-name (getenv "USER")) "!\n"))
 	  (insert (concat "Welcome to GNU Emacs " (format "%d.%d" emacs-major-version emacs-minor-version) ".\n"))
 	  (center-paragraph)
 	  (insert-char ?\n)
@@ -43,7 +43,11 @@
 
 (setq inhibit-startup-screen t
 	  inhibit-startup-message t
-	  inhibit-startup-echo-area-message t)
+	  inhibit-startup-echo-area-message t )
+
+;; Disable GNU Emacs help message.
+(defun startup-echo-area-message () "." "")
+;; Add splosh screen to startup.
 (add-hook 'window-setup-hook 'splosh-screen)
 
 (provide 'splash.el)
