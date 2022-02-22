@@ -108,7 +108,10 @@
 		company-frontends '(company-pseudo-tooltip-frontend ; show tooltip even for single candidate
 							company-echo-metadata-frontend))
   (define-key company-active-map (kbd "C-n") 'company-select-next)
-  (define-key company-active-map (kbd "C-p") 'company-select-previous))
+  (define-key company-active-map (kbd "C-p") 'company-select-previous)
+  (define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
+  (define-key company-active-map (kbd "M-.") 'company-show-location)
+  )
 
 (use-package flycheck :config (global-flycheck-mode +1))
 
@@ -122,15 +125,29 @@
 (use-package centered-cursor-mode
   :hook (prog-mode . centered-cursor-mode))
 
-(use-package viper
-  :ensure nil
+;;(use-package viper
+;;  :ensure nil
+;;  :config
+;;  (setq viper-minibuffer-vi-face nil
+;;		viper-minibuffer-emacs-face nil
+;;		viper-minibuffer-insert-face nil)
+;;  (setq viper-mode 'f)
+;;  (setq viper-inhibit-startup-message 't)
+;;  (setq viper-expert-level '5)
+;;  )
+
+(use-package slime
   :init
-  (setq viper-minibuffer-vi-face nil
-		viper-minibuffer-emacs-face nil
-		viper-minibuffer-insert-face nil)
-  (setq viper-mode t)
-  (setq viper-inhibit-startup-message 't)
-  (setq viper-expert-level '5)
+  (add-hook 'lisp-mode-hook (lambda () (slime-mode t)))
+  (slime-setup '(slime-fancy slime-company))
+  :config
+  (setq inferior-lisp-program "sbcl")
+  )
+
+(use-package slime-company
+  :after (slime company)
+  :config
+  (setq slime-company-completion 'fuzzy)
   )
 
 (provide 'config)
