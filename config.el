@@ -1,4 +1,4 @@
-;;; config.el --- Jan Hoekstra's Emacs Setup  -*- lexical-binding: t; -*-
+;;; config.el --- Zoë Hoekstra's Emacs Setup  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 ;; This file includes my configuration, divided per package.
@@ -15,6 +15,7 @@
   (tool-bar-mode 0)
   (menu-bar-mode 0)
   (blink-cursor-mode 0)
+  (tooltip-mode 0)
 
   (setq
    ;; No need for the default startup screen.
@@ -23,6 +24,8 @@
    initial-scratch-message nil
    ;; No annoying, distracting noises.
    ring-bell-function 'ignore
+   ;; Emacs 28 sets this to 1, a little too slow for classic scrollwheels
+   mouse-wheel-scroll-amount '(3)
    )
 
   (setq-default indent-tabs-mode 0
@@ -30,18 +33,18 @@
 				truncate-lines 1
 				truncate-partial-width-windows 1))
 
-(use-package challenger-deep-theme :config (load-theme 'challenger-deep 't))
+;;(use-package challenger-deep-theme :config (load-theme 'challenger-deep 't))
+(use-package modus-themes
+  :config (load-theme 'modus-operandi 't))
 
 ;; Themes like to reset font configuration,
 ;; So load fonts afterwards.
 (use-package emacs
   :config
-  (if (eq system-type 'gnu/linux)
+  (if t ;;(eq system-type 'gnu/linux)
 	  (progn
-		(set-face-attribute 'default nil :family "iA Writer Mono V")
-		(set-face-attribute 'mode-line nil :family "iA Writer Quattro V")))
-  (tooltip-mode 0)
-)
+		(set-face-attribute 'default nil :family "iA Writer Mono V" :height 130)
+		(set-face-attribute 'mode-line nil :family "iA Writer Quattro V"))))
 
 (use-package scroll-bar
   :ensure nil
@@ -55,31 +58,54 @@
   :ensure nil
   :config
   (setq confirm-kill-processes nil
-	create-lockfiles nil
-	make-backup-files nil))
+		create-lockfiles nil
+		make-backup-files nil))
 
 (use-package elec-pair
   :ensure nil
   :hook (prog-mode . electric-pair-mode))
 
-(use-package whitespace
-  :ensure nil
-  :hook (before-save . whitespace-cleanup))
+;;(use-package whitespace
+;;  :ensure nil
+;;  :hook (before-save . whitespace-cleanup))
 
-(use-package dired
-  :ensure nil
-  :config
+;;(use-package dired
+;;  :ensure nil
+;;  :config
 ;; Delete intermediate buffers when navigating through dired.
-  (setq delete-by-moving-to-trash t)
-  (put 'dired-find-alternate-file 'disabled nil)
-  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
+;;  (setq delete-by-moving-to-trash t)
+;;  (put 'dired-find-alternate-file 'disabled nil)
+;;  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
+;;  (define-key dired-mode-map [mouse-1] 'dired-find-alternate-file))
+
+(use-package dired-sidebar
+  :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
+  :ensure t
+  :commands (dired-sidebar-toggle-sidebar)
+  :init
+  (add-hook 'dired-sidebar-mode-hook
+			(lambda ()
+			  (unless (file-remote-p default-directory)
+				(auto-revert-mode))))
+  :config
+  (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
+  (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
+
+  (setq dired-sidebar-subtree-line-prefix "__")
+  ;;(setq dired-sidebar-theme 'vscode)
+  (setq dired-sidebar-use-term-integration t)
+  (setq dired-sidebar-use-custom-font t))
 
 (use-package org
   :ensure nil
   :config
   (add-hook 'org-mode-hook (lambda ()
 							 (defvar buffer-face-mode-face '(:family "iA Writer Quattro V"))
-							 (buffer-face-mode))))
+							 (buffer-face-mode)))
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((sql . t)))
+  )
 
 (use-package ido
   :ensure nil
@@ -88,11 +114,11 @@
   (setq ido-everywhere t
 		ido-enable-flex-matching t))
 
-(use-package ido-vertical-mode
-  :ensure nil
-  :config
-  (ido-vertical-mode +1)
-  (setq ido-vertical-define-keys 'C-n-C-p-up-and-down))
+;;(use-package ido-vertical-mode
+;;  :ensure nil
+;;  :config
+;;  (ido-vertical-mode +1)
+;;  (setq ido-vertical-define-keys 'C-n-C-p-up-and-down))
 
 (use-package ido-completing-read+ :config (ido-ubiquitous-mode +1))
 
@@ -125,17 +151,6 @@
 (use-package centered-cursor-mode
   :hook (prog-mode . centered-cursor-mode))
 
-;;(use-package viper
-;;  :ensure nil
-;;  :config
-;;  (setq viper-minibuffer-vi-face nil
-;;		viper-minibuffer-emacs-face nil
-;;		viper-minibuffer-insert-face nil)
-;;  (setq viper-mode 'f)
-;;  (setq viper-inhibit-startup-message 't)
-;;  (setq viper-expert-level '5)
-;;  )
-
 (use-package slime
   :init
   (add-hook 'lisp-mode-hook (lambda () (slime-mode t)))
@@ -148,6 +163,38 @@
   :after (slime company)
   :config
   (setq slime-company-completion 'fuzzy)
+  )
+
+(use-package markdown-mode
+  :init
+  (add-hook 'markdown-mode-hook (lambda ()
+								  (defvar buffer-face-mode-face '(:family "iA Writer Quattro V"))
+								  (buffer-face-mode)
+								  (visual-line-mode)))
+  :config
+  (setq markdown-hide-markup t)
+  (setq markdown-header-scaling t)
+  (setq markdown-inline-image-overlays t)
+  )
+
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+		 (typescript-mode . tide-hl-identifier-mode)
+		 (before-save . tide-format-before-save)))
+
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (when (memq window-system '(mac ns x))
+	(exec-path-from-shell-initialize))
+  )
+
+(use-package evil
+  :ensure t
+  :init
+  (evil-mode)
   )
 
 (provide 'config)
