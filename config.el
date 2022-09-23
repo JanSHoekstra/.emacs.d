@@ -44,7 +44,7 @@
   :config
   (if (not (eq system-type 'windows-nt))
 	  (progn
-		(set-face-attribute 'default nil :family "iA Writer Mono V" :height 130)
+		(set-face-attribute 'default nil :family "iA Writer Mono V" :height (if (> (x-display-pixel-height) 1080) 130 100))
 		(set-face-attribute 'mode-line nil :family "iA Writer Quattro V"))))
 
 (use-package scroll-bar
