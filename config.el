@@ -44,8 +44,8 @@
   :config
   (if (not (eq system-type 'windows-nt))
 	  (progn
-		(set-face-attribute 'default nil :family "iA Writer Mono V" :height (if (> (x-display-pixel-height) 1080) 130 100))
-		(set-face-attribute 'mode-line nil :family "iA Writer Quattro V"))))
+		(set-face-attribute 'default nil :family "iA Writer Mono S" :height (if (> (x-display-pixel-height) 1080) 130 110))
+		(set-face-attribute 'mode-line nil :family "iA Writer Quattro S"))))
 
 (use-package scroll-bar
   :ensure nil
@@ -95,7 +95,7 @@
   :ensure nil
   :config
   (add-hook 'org-mode-hook (lambda ()
-							 (defvar buffer-face-mode-face '(:family "iA Writer Quattro V"))
+							 (defvar buffer-face-mode-face '(:family "iA Writer Quattro S"))
 							 (buffer-face-mode))))
 
 (use-package ido
