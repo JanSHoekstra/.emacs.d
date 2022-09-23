@@ -5,7 +5,7 @@
 
 ;;; Code:
 
-(load "~/.emacs.d/splash")
+;;(load "~/.emacs.d/splash")
 
 (use-package emacs
   :ensure nil
@@ -26,7 +26,8 @@
    ring-bell-function 'ignore
    ;; Emacs 28 sets this to 1, a little too slow for classic scrollwheels
    mouse-wheel-scroll-amount '(3)
-   )
+   ;; Allow Emacs to scale pixelwise, otherwise it looks a little odd in WMs
+   frame-resize-pixelwise t)
 
   (setq-default indent-tabs-mode 0
 				tab-width 4
@@ -41,7 +42,7 @@
 ;; So load fonts afterwards.
 (use-package emacs
   :config
-  (if t ;;(eq system-type 'gnu/linux)
+  (if (not (eq system-type 'windows-nt))
 	  (progn
 		(set-face-attribute 'default nil :family "iA Writer Mono V" :height 130)
 		(set-face-attribute 'mode-line nil :family "iA Writer Quattro V"))))
@@ -65,18 +66,12 @@
   :ensure nil
   :hook (prog-mode . electric-pair-mode))
 
-;;(use-package whitespace
-;;  :ensure nil
-;;  :hook (before-save . whitespace-cleanup))
-
-;;(use-package dired
-;;  :ensure nil
-;;  :config
-;; Delete intermediate buffers when navigating through dired.
-;;  (setq delete-by-moving-to-trash t)
-;;  (put 'dired-find-alternate-file 'disabled nil)
-;;  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
-;;  (define-key dired-mode-map [mouse-1] 'dired-find-alternate-file))
+(use-package whitespace
+  :ensure nil
+  :config (defun clean-whitespace-in-prog-buffers ()
+			  (when (derived-mode-p major-mode)
+				(whitespace-cleanup)))
+  :hook (before-save . clean-whitespace-in-prog-buffers))
 
 (use-package dired-sidebar
   :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
@@ -101,11 +96,7 @@
   :config
   (add-hook 'org-mode-hook (lambda ()
 							 (defvar buffer-face-mode-face '(:family "iA Writer Quattro V"))
-							 (buffer-face-mode)))
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((sql . t)))
-  )
+							 (buffer-face-mode))))
 
 (use-package ido
   :ensure nil
@@ -113,12 +104,6 @@
   (ido-mode +1)
   (setq ido-everywhere t
 		ido-enable-flex-matching t))
-
-;;(use-package ido-vertical-mode
-;;  :ensure nil
-;;  :config
-;;  (ido-vertical-mode +1)
-;;  (setq ido-vertical-define-keys 'C-n-C-p-up-and-down))
 
 (use-package ido-completing-read+ :config (ido-ubiquitous-mode +1))
 
@@ -136,8 +121,7 @@
   (define-key company-active-map (kbd "C-n") 'company-select-next)
   (define-key company-active-map (kbd "C-p") 'company-select-previous)
   (define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
-  (define-key company-active-map (kbd "M-.") 'company-show-location)
-  )
+  (define-key company-active-map (kbd "M-.") 'company-show-location))
 
 (use-package flycheck :config (global-flycheck-mode +1))
 
@@ -145,8 +129,7 @@
   :hook (prog-mode . projectile-mode)
   :config
   (define-key projectile-mode-map (kbd "<f5>") 'projectile-compile-project)
-  (define-key projectile-mode-map (kbd "<f6>") 'projectile-run-project)
-  )
+  (define-key projectile-mode-map (kbd "<f6>") 'projectile-run-project))
 
 (use-package centered-cursor-mode
   :hook (prog-mode . centered-cursor-mode))
@@ -156,14 +139,12 @@
   (add-hook 'lisp-mode-hook (lambda () (slime-mode t)))
   (slime-setup '(slime-fancy slime-company))
   :config
-  (setq inferior-lisp-program "sbcl")
-  )
+  (setq inferior-lisp-program "sbcl"))
 
 (use-package slime-company
   :after (slime company)
   :config
-  (setq slime-company-completion 'fuzzy)
-  )
+  (setq slime-company-completion 'fuzzy))
 
 (use-package markdown-mode
   :init
@@ -172,10 +153,16 @@
 								  (buffer-face-mode)
 								  (visual-line-mode)))
   :config
+
+  (custom-set-faces
+   '(markdown-header-face ((t (:inherit font-lock-function-name-face :weight bold :family "variable-pitch"))))
+   '(markdown-header-face-1 ((t (:inherit markdown-header-face :height 1.8))))
+   '(markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.4))))
+   '(markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.2)))))
+
   (setq markdown-hide-markup t)
   (setq markdown-header-scaling t)
-  (setq markdown-inline-image-overlays t)
-  )
+  (setq markdown-inline-image-overlays t))
 
 (use-package tide
   :ensure t
@@ -188,14 +175,12 @@
   :ensure t
   :config
   (when (memq window-system '(mac ns x))
-	(exec-path-from-shell-initialize))
-  )
+	(exec-path-from-shell-initialize)))
 
 (use-package evil
   :ensure t
   :init
-  (evil-mode)
-  )
+  (evil-mode))
 
 (provide 'config)
 ;;; config.el ends here
