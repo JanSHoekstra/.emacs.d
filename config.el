@@ -34,9 +34,9 @@
 				truncate-lines 1
 				truncate-partial-width-windows 1))
 
-;;(use-package challenger-deep-theme :config (load-theme 'challenger-deep 't))
-(use-package modus-themes
-  :config (load-theme 'modus-operandi 't))
+(if (eq system-type 'darwin)
+  (use-package modus-themes :config (load-theme 'modus-operandi 't))
+  (use-package challenger-deep-theme :config (load-theme 'challenger-deep 't)))
 
 ;; Themes like to reset font configuration,
 ;; So load fonts afterwards.
@@ -181,6 +181,16 @@
   :ensure t
   :init
   (evil-mode))
+
+(use-package clojure-mode)
+(use-package inf-clojure
+  :init
+  (defun cljs-node-repl ()
+	(interactive)
+	(inf-clojure "clj -M -m cljs.main -co build.edn -re node -r"))
+  )
+(use-package cider)
+(use-package rainbow-delimiters)
 
 (provide 'config)
 ;;; config.el ends here

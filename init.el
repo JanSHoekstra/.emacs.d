@@ -2,7 +2,8 @@
 (setq gc-cons-threshold 100000000)
 (setq custom-file "/tmp/emacs.custom.el")
 (require 'package)
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")))
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+						 ("gnu" . "https://elpa.gnu.org/packages/")))
 (package-initialize)
 (unless (package-installed-p 'use-package)
   ;; only fetch the archives if you don't have use-package installed
