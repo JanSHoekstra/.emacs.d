@@ -87,13 +87,20 @@
   (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
 
   (setq dired-sidebar-subtree-line-prefix "__")
-  ;;(setq dired-sidebar-theme 'vscode)
+  ;; (setq dired-sidebar-theme 'vscode)
   (setq dired-sidebar-use-term-integration t)
   (setq dired-sidebar-use-custom-font t))
 
 (use-package org
   :ensure nil
   :config
+  ;; Always be able to open the agenda through it's shortcut
+  (global-set-key "\C-ca" 'org-agenda)
+  (global-set-key "\C-cl" 'org-store-link)
+  (setq org-agenda-files '("~/Sync/org"))
+  ;; Add all the events Emacs knows about
+  (defvar org-agenda-include-diary t)
+  ;; Use the Quattro font only for org buffers
   (add-hook 'org-mode-hook (lambda ()
 							 (defvar buffer-face-mode-face '(:family "iA Writer Quattro S"))
 							 (buffer-face-mode))))
@@ -132,7 +139,9 @@
   (define-key projectile-mode-map (kbd "<f6>") 'projectile-run-project))
 
 (use-package centered-cursor-mode
-  :hook (prog-mode . centered-cursor-mode))
+  :hook (prog-mode . centered-cursor-mode)
+  :config (setq ccm-recenter-at-end-of-file t
+				ccm-recenter-end-of-file t))
 
 (use-package slime
   :init
@@ -153,7 +162,6 @@
 								  (buffer-face-mode)
 								  (visual-line-mode)))
   :config
-
   (custom-set-faces
    '(markdown-header-face ((t (:inherit font-lock-function-name-face :weight bold :family "variable-pitch"))))
    '(markdown-header-face-1 ((t (:inherit markdown-header-face :height 1.8))))
@@ -163,6 +171,9 @@
   (setq markdown-hide-markup t)
   (setq markdown-header-scaling t)
   (setq markdown-inline-image-overlays t))
+
+(use-package typescript-mode
+  :mode "\\.tsx?$")
 
 (use-package tide
   :ensure t
@@ -190,7 +201,17 @@
 	(inf-clojure "clj -M -m cljs.main -co build.edn -re node -r"))
   )
 (use-package cider)
-(use-package rainbow-delimiters)
+(use-package rainbow-delimiters
+  :config
+  (global-set-key "\C-cr" 'rainbow-delimiters-mode))
+
+(use-package aggressive-indent
+  :config
+  (global-set-key "\C-ci" 'aggressive-indent-mode))
+
+(use-package eglot
+  :config
+  (global-set-key "\C-cl" 'eglot))
 
 (provide 'config)
 ;;; config.el ends here
