@@ -1,5 +1,6 @@
 ;;; config.el --- Zoë Hoekstra's Emacs Setup  -*- lexical-binding: t; -*-
 
+
 ;;; Commentary:
 ;; This file includes my configuration, divided per package.
 
@@ -100,10 +101,16 @@
   (setq org-agenda-files '("~/Sync/org"))
   ;; Add all the events Emacs knows about
   (defvar org-agenda-include-diary t)
+
+  (setq hscroll-margin 9999)
+
   ;; Use the Quattro font only for org buffers
   (add-hook 'org-mode-hook (lambda ()
 							 (defvar buffer-face-mode-face '(:family "iA Writer Quattro S"))
 							 (buffer-face-mode))))
+
+(use-package org-protocol
+  :ensure nil)
 
 (use-package ido
   :ensure nil
@@ -191,16 +198,26 @@
 (use-package evil
   :ensure t
   :init
-  (evil-mode))
+  ;;(evil-mode)
+  )
 
 (use-package clojure-mode)
+(use-package cider
+  :config
+  (add-hook 'clojure-mode-hook #'cider-mode))
+(use-package paredit
+  :config
+  (add-hook 'clojure-mode-hook 'paredit-mode)
+  )
+(use-package origami
+  :init
+  (global-origami-mode))
 (use-package inf-clojure
   :init
   (defun cljs-node-repl ()
 	(interactive)
 	(inf-clojure "clj -M -m cljs.main -co build.edn -re node -r"))
   )
-(use-package cider)
 (use-package rainbow-delimiters
   :config
   (global-set-key "\C-cr" 'rainbow-delimiters-mode))
@@ -209,9 +226,41 @@
   :config
   (global-set-key "\C-ci" 'aggressive-indent-mode))
 
+(use-package haskell-mode)
+
 (use-package eglot
+  :ensure nil
   :config
-  (global-set-key "\C-cl" 'eglot))
+  (global-set-key "\C-cl" 'eglot)
+  (add-hook 'haskell-mode-hook 'eglot-ensure)
+  (add-hook 'clojure-mode-hook 'eglot-ensure)
+  (setq-default eglot-workspace-configuration
+				'((haskell
+				   (plugin
+					(stan
+					 (globalOn . :json-false))))))  ;; disable stan
+  :custom
+  (eglot-autoshutdown t)  ;; shutdown language server after closing last file
+  (eglot-confirm-server-initiated-edits nil)  ;; allow edits without confirmation
+)
+
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory (file-truename "~/notes"))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+		 ("C-c n f" . org-roam-node-find)
+		 ("C-c n g" . org-roam-graph)
+		 ("C-c n i" . org-roam-node-insert)
+		 ("C-c n c" . org-roam-capture)
+		 ;; Dailies
+		 ("C-c n j" . org-roam-dailies-capture-today))
+  :config
+  ;; If you're using a vertical completion framework, you might want a more informative completion interface
+  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (org-roam-db-autosync-mode)
+  ;; If using org-roam-protocol
+  (require 'org-roam-protocol))
 
 (provide 'config)
 ;;; config.el ends here
