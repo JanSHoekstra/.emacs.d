@@ -28,7 +28,10 @@
    ;; Emacs 28 sets this to 1, a little too slow for classic scrollwheels
    mouse-wheel-scroll-amount '(3)
    ;; Allow Emacs to scale pixelwise, otherwise it looks a little odd in WMs
-   frame-resize-pixelwise t)
+   frame-resize-pixelwise t
+   ;; On long lines, keep the cursor in the middle of the screen (horizontally)
+   hscroll-margin 9999
+   )
 
   (setq-default indent-tabs-mode 0
 				tab-width 4
@@ -102,7 +105,6 @@
   ;; Add all the events Emacs knows about
   (defvar org-agenda-include-diary t)
 
-  (setq hscroll-margin 9999)
 
   ;; Use the Quattro font only for org buffers
   (add-hook 'org-mode-hook (lambda ()
@@ -204,7 +206,20 @@
 (use-package clojure-mode)
 (use-package cider
   :config
-  (add-hook 'clojure-mode-hook #'cider-mode))
+  (add-hook 'clojure-mode-hook #'cider-mode)
+
+  (defun clerk-show ()
+	(interactive)
+	(when-let
+		((filename
+		  (buffer-file-name)))
+	  (save-buffer)
+	  (cider-interactive-eval
+	   (concat "(nextjournal.clerk/show! \"" filename "\")"))))
+
+  (define-key clojure-mode-map (kbd "<M-return>") 'clerk-show)
+  )
+
 (use-package paredit
   :config
   (add-hook 'clojure-mode-hook 'paredit-mode)
@@ -261,6 +276,17 @@
   (org-roam-db-autosync-mode)
   ;; If using org-roam-protocol
   (require 'org-roam-protocol))
+
+(use-package plantuml-mode
+  :custom
+  (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode))
+  (add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((plantuml . t)))
+  :config
+  (setq plantuml-default-exec-mode 'exec)
+  )
 
 (provide 'config)
 ;;; config.el ends here
