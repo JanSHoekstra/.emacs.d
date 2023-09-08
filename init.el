@@ -3,7 +3,8 @@
 (setq custom-file "/tmp/emacs.custom.el")
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-						 ("gnu" . "https://elpa.gnu.org/packages/")))
+						 ("gnu" . "https://elpa.gnu.org/packages/")
+						 ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
 (package-initialize)
 (unless (package-installed-p 'use-package)
   ;; only fetch the archives if you don't have use-package installed
