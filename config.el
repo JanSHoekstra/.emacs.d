@@ -107,6 +107,8 @@
   (evil-set-undo-system 'undo-redo)
   )
 
+(use-package magit)
+
 (use-package simple
   :ensure nil
   :config (column-number-mode +1))
