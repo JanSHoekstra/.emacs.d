@@ -6,6 +6,7 @@
 
 ;;; Code:
 
+;; {{{ Emacs
 (use-package emacs
   :ensure nil
   :config
@@ -16,6 +17,9 @@
   (blink-cursor-mode 0)
   (tooltip-mode 0)
   (scroll-bar-mode 0)
+
+  (set-face-attribute 'mode-line nil :box nil)
+  (set-face-attribute 'mode-line-inactive nil :box nil)
 
   ;; Enable mouse in terminal
   (xterm-mouse-mode 1)
@@ -90,22 +94,34 @@
 		(set-face-attribute 'default nil :family "iA Writer Mono S" :height (if (> (x-display-pixel-height) 1080) 130 110))
 		(set-face-attribute 'mode-line nil :family "iA Writer Quattro S"))))
 
-(use-package eat
-  :ensure t)
-
-;; Used for evil folds
+;; }}}
+;; {{{ Folds
+;; Used for folds based on syntax
 (use-package hs-minor-mode
   :ensure nil
   :hook (prog-mode . hs-minor-mode))
 
+;; Used for folds based on comments
+(use-package vimish-fold
+  :after evil)
+
+(use-package evil-vimish-fold
+  :after vimish-fold
+  :hook ((prog-mode conf-mode text-mode) . evil-vimish-fold-mode))
+
+;; }}}
+;; {{{ General
 ;; Enable evil vi bindings
 (use-package evil
   :ensure t
   :init
+  (setq evil-undo-system 'undo-redo)
   (evil-mode)
-  :custom
-  (evil-set-undo-system 'undo-redo)
   )
+
+;; Emacs native terminal, with decent behaviour and speed
+(use-package eat
+  :ensure t)
 
 (use-package magit)
 
@@ -119,17 +135,6 @@
   (setq confirm-kill-processes nil
 		create-lockfiles nil
 		make-backup-files nil))
-
-(use-package elec-pair
-  :ensure nil
-  :hook (prog-mode . electric-pair-mode))
-
-(use-package whitespace
-  :ensure nil
-  :config (defun clean-whitespace-in-prog-buffers ()
-			(when (derived-mode-p major-mode)
-			  (whitespace-cleanup)))
-  :hook (before-save . clean-whitespace-in-prog-buffers))
 
 (use-package dired-sidebar
   :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
@@ -149,25 +154,6 @@
   (setq dired-sidebar-use-term-integration t)
   (setq dired-sidebar-use-custom-font t))
 
-(use-package org
-  :ensure nil
-  :config
-  ;; Always be able to open the agenda through it's shortcut
-  (global-set-key "\C-ca" 'org-agenda)
-  (global-set-key "\C-cl" 'org-store-link)
-  (setq org-agenda-files '("~/Sync/org"))
-  ;; Add all the events Emacs knows about
-  (defvar org-agenda-include-diary t)
-
-
-  ;; Use the Quattro font only for org buffers
-  (add-hook 'org-mode-hook (lambda ()
-							 (defvar buffer-face-mode-face '(:family "iA Writer Quattro S"))
-							 (buffer-face-mode))))
-
-(use-package org-protocol
-  :ensure nil)
-
 (use-package ido
   :ensure nil
   :config
@@ -180,6 +166,35 @@
 (use-package flx-ido :config (flx-ido-mode +1))
 
 (use-package flx)
+
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (when (memq window-system '(mac ns x))
+	(exec-path-from-shell-initialize)))
+
+(use-package delight
+  :config
+  (delight 'eldoc-mode nil "eldoc")
+  (delight 'lispyville-mode nil "lispyville")
+  (delight 'aggressive-indent-mode nil "aggressive-indent")
+  (delight 'evil-vimish-fold-mode nil "evil-vimish-fold")
+  (delight 'centered-cursor-mode nil)
+  (delight 'hs-minor-mode nil "hide-show")
+  (delight 'company-mode nil "company"))
+
+;; }}}
+;; {{{ General Programming
+(use-package elec-pair
+  :ensure nil
+  :hook (prog-mode . electric-pair-mode))
+
+(use-package whitespace
+  :ensure nil
+  :config (defun clean-whitespace-in-prog-buffers ()
+			(when (derived-mode-p major-mode)
+			  (whitespace-cleanup)))
+  :hook (before-save . clean-whitespace-in-prog-buffers))
 
 (use-package company
   :hook (prog-mode . company-mode)
@@ -201,11 +216,6 @@
 
 (use-package flycheck :config (global-flycheck-mode +1))
 
-(use-package jinx
-  :hook ((markdown-mode . jinx-mode)
-		 (text-mode . jinx-mode)
-		 (org-mode . jinx-mode)))
-
 (use-package projectile
   :hook (prog-mode . projectile-mode)
   :config
@@ -217,71 +227,6 @@
   :config (setq ccm-recenter-at-end-of-file t
 				ccm-recenter-end-of-file t))
 
-(use-package lispyville
-  :hook ((emacs-lisp-mode . lispyville-mode)
-		 (clojure-mode . lispyville-mode)
-		 (scheme-mode . lispyville-mode)))
-
-(use-package slime
-  :init
-  (add-hook 'lisp-mode-hook (lambda () (slime-mode t)))
-  (slime-setup '(slime-fancy slime-company slime-quicklisp slime-asdf))
-  :config
-  (setq inferior-lisp-program "sbcl"))
-
-(use-package slime-company
-  :after (slime company)
-  :config
-  (setq slime-company-completion 'fuzzy))
-
-(use-package markdown-mode
-  :init
-  (add-hook 'markdown-mode-hook (lambda ()
-								  (defvar buffer-face-mode-face '(:family "iA Writer Quattro V"))
-								  (buffer-face-mode)
-								  (visual-line-mode)))
-  :config
-  (custom-set-faces
-   '(markdown-header-face ((t (:inherit font-lock-function-name-face :weight bold :family "variable-pitch"))))
-   '(markdown-header-face-1 ((t (:inherit markdown-header-face :height 1.8))))
-   '(markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.4))))
-   '(markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.2)))))
-
-  (setq markdown-hide-markup t)
-  (setq markdown-header-scaling t)
-  (setq markdown-inline-image-overlays t))
-
-(use-package typescript-mode
-  :mode "\\.tsx?$")
-
-(use-package tide
-  :ensure t
-  :after (typescript-mode company flycheck)
-  :hook ((typescript-mode . tide-setup)
-		 (typescript-mode . tide-hl-identifier-mode)
-		 (before-save . tide-format-before-save)))
-
-(use-package exec-path-from-shell
-  :ensure t
-  :config
-  (when (memq window-system '(mac ns x))
-	(exec-path-from-shell-initialize)))
-
-(use-package clojure-mode)
-(use-package cider
-  :config
-  (add-hook 'clojure-mode-hook #'cider-mode))
-
-(use-package paredit
-  :config
-  (add-hook 'clojure-mode-hook 'paredit-mode))
-
-(use-package inf-clojure
-  :init
-  (defun cljs-node-repl ()
-	(interactive)
-	(inf-clojure "clj -M -m cljs.main -co build.edn -re node -r")))
-
 (use-package rainbow-delimiters
   :config
   (global-set-key "\C-cr" 'rainbow-delimiters-mode))
@@ -289,8 +234,8 @@
 (use-package aggressive-indent
   :config
   (global-set-key "\C-ci" 'aggressive-indent-mode)
-  :hook ((prog-mode-hook . aggressive-indent-mode)
-		 (slime-repl-mode-hook . aggressive-indent-mode)
+  :hook ((prog-mode . aggressive-indent-mode)
+		 (slime-repl-mode . aggressive-indent-mode)
 		 (scheme-mode . aggressive-indent-mode)
 		 (emacs-lisp-mode . aggressive-indent-mode)))
 
@@ -315,6 +260,51 @@
   :ensure t
   :bind ("M-RET" . emr-show-refactor-menu))
 
+
+;; }}}
+;; {{{ Writing
+(use-package jinx
+  :config
+  (setq jinx-languages "en_GB nl_NL")
+  :hook ((markdown-mode . jinx-mode)
+		 (text-mode . jinx-mode)
+		 (org-mode . jinx-mode)))
+
+(use-package markdown-mode
+  :init
+  (add-hook 'markdown-mode-hook (lambda ()
+								  (defvar buffer-face-mode-face '(:family "iA Writer Quattro V"))
+								  (buffer-face-mode)
+								  (visual-line-mode)))
+  :config
+  (custom-set-faces
+   '(markdown-header-face ((t (:inherit font-lock-function-name-face :weight bold :family "variable-pitch"))))
+   '(markdown-header-face-1 ((t (:inherit markdown-header-face :height 1.8))))
+   '(markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.4))))
+   '(markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.2)))))
+
+  (setq markdown-hide-markup t)
+  (setq markdown-header-scaling t)
+  (setq markdown-inline-image-overlays t))
+
+(use-package org
+  :ensure nil
+  :config
+  ;; Always be able to open the agenda through it's shortcut
+  (global-set-key "\C-ca" 'org-agenda)
+  (global-set-key "\C-cl" 'org-store-link)
+  (setq org-agenda-files '("~/Sync/org"))
+  ;; Add all the events Emacs knows about
+  (defvar org-agenda-include-diary t)
+
+
+  ;; Use the Quattro font only for org buffers
+  (add-hook 'org-mode-hook (lambda ()
+							 (defvar buffer-face-mode-face '(:family "iA Writer Quattro S"))
+							 (buffer-face-mode))))
+(use-package org-protocol
+  :ensure nil)
+
 (use-package org-roam
   :ensure t
   :custom
@@ -333,6 +323,58 @@
   ;; If using org-roam-protocol
   (require 'org-roam-protocol))
 
+;; }}}
+;; {{{ Lisp
+(use-package lispyville
+  :hook ((emacs-lisp-mode . lispyville-mode)
+		 (clojure-mode . lispyville-mode)
+		 (scheme-mode . lispyville-mode)))
+
+(use-package slime
+  :init
+  (add-hook 'lisp-mode-hook (lambda () (slime-mode t)))
+  (slime-setup '(slime-fancy slime-company slime-quicklisp slime-asdf))
+  :config
+  (setq inferior-lisp-program "sbcl"))
+
+(use-package slime-company
+  :after (slime company)
+  :config
+  (setq slime-company-completion 'fuzzy))
+
+(use-package clojure-mode)
+(use-package cider
+  :config
+  (add-hook 'clojure-mode-hook #'cider-mode))
+
+(use-package inf-clojure
+  :init
+  (defun cljs-node-repl ()
+	(interactive)
+	(inf-clojure "clj -M -m cljs.main -co build.edn -re node -r")))
+
+(use-package paredit
+  :config
+  (add-hook 'clojure-mode-hook 'paredit-mode))
+
+(use-package geiser)
+(use-package geiser-guile)
+(use-package geiser-chicken)
+
+(use-package racket-mode)
+
+;; }}}
+;; {{{ Programming language specific
+(use-package typescript-mode
+  :mode "\\.tsx?$")
+
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+		 (typescript-mode . tide-hl-identifier-mode)
+		 (before-save . tide-format-before-save)))
+
 (use-package plantuml-mode
   :custom
   (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode))
@@ -342,6 +384,16 @@
    '((plantuml . t)))
   :config
   (setq plantuml-default-exec-mode 'exec))
+
+(use-package sass-mode
+  :mode "\\.sass?$"
+  :custom
+  (flycheck-mode nil)
+  )
+
+;;(load "~/.emacs.d/sass-mode/sass-mode")
+
+;; }}}
 
 (provide 'config)
 ;;; config.el ends here
