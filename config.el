@@ -7,9 +7,17 @@
 ;;; Code:
 
 ;; {{{ Emacs
+(use-package modus-themes :config (load-theme 'modus-vivendi-tinted 't))
+
 (use-package emacs
+  :diminish auto-revert-mode
   :ensure nil
   :config
+
+  (if (not (eq system-type 'windows-nt))
+	  (progn
+		(set-face-attribute 'default nil :family "iA Writer Mono S" :height 120)
+		(set-face-attribute 'mode-line nil :family "iA Writer Quattro S")))
 
   ;; Disable UI nonsense.
   (tool-bar-mode 0)
@@ -78,22 +86,6 @@
 
 	(setq interprogram-cut-function 'wl-copy)
 	(setq interprogram-paste-function 'wl-paste)))
-
-(if (eq system-type 'darwin)
-	(use-package modus-themes :config (load-theme 'modus-operandi 't))
-  (use-package modus-themes :config (load-theme 'modus-vivendi-tinted 't)))
-;;(use-package challenger-deep-theme :config (load-theme 'challenger-deep 't)))
-
-;; Themes like to reset font configuration,
-;; So load fonts afterwards.
-(use-package emacs
-  :ensure nil
-  :config
-  (if (not (eq system-type 'windows-nt))
-	  (progn
-		(set-face-attribute 'default nil :family "iA Writer Mono S" :height (if (> (x-display-pixel-height) 1080) 130 110))
-		(set-face-attribute 'mode-line nil :family "iA Writer Quattro S"))))
-
 ;; }}}
 ;; {{{ Folds
 ;; Used for folds based on syntax
@@ -117,7 +109,30 @@
   :init
   (setq evil-undo-system 'undo-redo)
   (evil-mode)
-  )
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit))
+
+;; Useful to remember keybinds
+(use-package which-key
+  :diminish which-key-mode
+  :init
+  (which-key-mode)
+  (which-key-setup-minibuffer)
+  :config
+  (setq which-key-idle-delay 0.5))
+
+(use-package general
+  :init
+  ;; Global keybinds
+  (general-define-key
+   :states '(normal)
+   :keymaps 'override
+   :prefix "SPC"
+   "1" 'delete-other-windows)
+  (general-define-key
+   :states 'normal
+   :keymaps 'org-mode-map
+   :prefix ","
+   "t" 'org-todo))
 
 ;; Emacs native terminal, with decent behaviour and speed
 (use-package eat
@@ -289,19 +304,40 @@
 
 (use-package org
   :ensure nil
+  :init
+  ;; Use the Quattro font only for org buffers
+  (add-hook 'org-mode-hook (lambda ()
+							 (defvar buffer-face-mode-face '(:family "iA Writer Quattro V"))
+							 (buffer-face-mode)
+							 (visual-line-mode)))
   :config
   ;; Always be able to open the agenda through it's shortcut
   (global-set-key "\C-ca" 'org-agenda)
   (global-set-key "\C-cl" 'org-store-link)
-  (setq org-agenda-files '("~/Sync/org"))
+  (setq org-agenda-files '("~/org"))
   ;; Add all the events Emacs knows about
   (defvar org-agenda-include-diary t)
 
+  (defvar org-publish-project-alist
+	'(("org"
+	   :base-directory "~/org/"
+	   :publishing-function org-html-publish-to-html
+	   :publishing-directory "~/org-export"
+	   :section-numbers nil
+	   :with-toc nil
+	   :html-head "<link rel=\"stylesheet\"
+					href=\"/other/theme.css\"
+					type=\"text/css\"/>")
+	  ("web"
+	   :base-directory "~/org/web"
+	   :publishing-function org-html-publish-to-html
+	   :publishing-directory "~/org-export-web"
+	   :section-numbers nil
+	   :with-toc nil
+	   :html-head "<link rel=\"stylesheet\"
+					href=\"/other/theme.css\"
+					type=\"text/css\"/>"))))
 
-  ;; Use the Quattro font only for org buffers
-  (add-hook 'org-mode-hook (lambda ()
-							 (defvar buffer-face-mode-face '(:family "iA Writer Quattro S"))
-							 (buffer-face-mode))))
 (use-package org-protocol
   :ensure nil)
 
@@ -322,6 +358,17 @@
   (org-roam-db-autosync-mode)
   ;; If using org-roam-protocol
   (require 'org-roam-protocol))
+
+(use-package evil-org
+  :diminish evil-org-mode
+  :after org
+  :config
+  (add-hook 'org-mode-hook 'evil-org-mode)
+  (add-hook 'evil-org-mode-hook
+			(lambda () (evil-org-set-key-theme))))
+
+(require 'evil-org-agenda)
+(evil-org-agenda-set-keys)
 
 ;; }}}
 ;; {{{ Lisp
@@ -360,7 +407,6 @@
 (use-package geiser)
 (use-package geiser-guile)
 (use-package geiser-chicken)
-
 (use-package racket-mode)
 
 ;; }}}
@@ -390,10 +436,6 @@
   :custom
   (flycheck-mode nil)
   )
-
-;;(load "~/.emacs.d/sass-mode/sass-mode")
-
 ;; }}}
-
 (provide 'config)
 ;;; config.el ends here
