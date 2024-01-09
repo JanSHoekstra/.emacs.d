@@ -1,12 +1,12 @@
 ;;; config.el --- Zoë Hoekstra's Emacs Setup  -*- lexical-binding: t; -*-
 
-
 ;;; Commentary:
 ;; This file includes my configuration, divided per package.
 
 ;;; Code:
 
-;; {{{ Emacs
+;;;;;;;; Emacs
+
 (use-package modus-themes :config (load-theme 'modus-vivendi-tinted 't))
 
 (use-package emacs
@@ -16,8 +16,13 @@
 
   (if (not (eq system-type 'windows-nt))
 	  (progn
-		(set-face-attribute 'default nil :family "iA Writer Mono S" :height 120)
-		(set-face-attribute 'mode-line nil :family "iA Writer Quattro S")))
+		(set-face-attribute 'default
+							nil
+							:family "iA Writer Mono S"
+							:height 120)
+		(set-face-attribute 'mode-line
+							nil
+							:family "iA Writer Quattro S")))
 
   ;; Disable UI nonsense.
   (tool-bar-mode 0)
@@ -86,23 +91,15 @@
 
 	(setq interprogram-cut-function 'wl-copy)
 	(setq interprogram-paste-function 'wl-paste)))
-;; }}}
-;; {{{ Folds
-;; Used for folds based on syntax
+
+;;;;;;;; Folds
+
 (use-package hs-minor-mode
   :ensure nil
   :hook (prog-mode . hs-minor-mode))
 
-;; Used for folds based on comments
-(use-package vimish-fold
-  :after evil)
+;;;;;;;; General
 
-(use-package evil-vimish-fold
-  :after vimish-fold
-  :hook ((prog-mode conf-mode text-mode) . evil-vimish-fold-mode))
-
-;; }}}
-;; {{{ General
 ;; Enable evil vi bindings
 (use-package evil
   :ensure t
@@ -198,8 +195,8 @@
   (delight 'hs-minor-mode nil "hide-show")
   (delight 'company-mode nil "company"))
 
-;; }}}
-;; {{{ General Programming
+;;;;;;;; General Programming
+
 (use-package elec-pair
   :ensure nil
   :hook (prog-mode . electric-pair-mode))
@@ -218,7 +215,8 @@
 		company-idle-delay 0.1
 		company-selection-wrap-around t
 		company-tooltip-align-annotations t
-		company-frontends '(company-pseudo-tooltip-frontend ; show tooltip even for single candidate
+		;; show tooltip even for single candidate
+		company-frontends '(company-pseudo-tooltip-frontend
 							company-echo-metadata-frontend))
   (define-key company-active-map (kbd "C-n") 'company-select-next)
   (define-key company-active-map (kbd "C-p") 'company-select-previous)
@@ -267,36 +265,46 @@
 					(stan
 					 (globalOn . :json-false))))))  ;; disable stan
   :custom
-  (eglot-autoshutdown t)  ;; shutdown language server after closing last file
-  (eglot-confirm-server-initiated-edits nil)  ;; allow edits without confirmation
-  )
+  ;; shutdown language server after closing last file
+  (eglot-autoshutdown t)
+  ;; allow edits without confirmation
+  (eglot-confirm-server-initiated-edits nil))
 
-(use-package emr ;; EMacs Refactoring system
+(use-package eldoc
+  :ensure nil
+  :config
+  ;; When eldoc buffer is open, don't show it in minibuffer anymore.
+  (setq eldoc-echo-area-prefer-doc-buffer t))
+
+;; EMacs Refactoring system
+(use-package emr
   :ensure t
   :bind ("M-RET" . emr-show-refactor-menu))
 
-
-;; }}}
-;; {{{ Writing
-(use-package jinx
-  :config
-  (setq jinx-languages "en_GB nl_NL")
-  :hook ((markdown-mode . jinx-mode)
-		 (text-mode . jinx-mode)
-		 (org-mode . jinx-mode)))
+;;;;;;;; Writing
 
 (use-package markdown-mode
   :init
   (add-hook 'markdown-mode-hook (lambda ()
-								  (defvar buffer-face-mode-face '(:family "iA Writer Quattro V"))
+								  (defvar buffer-face-mode-face
+									'(:family "iA Writer Quattro V"))
 								  (buffer-face-mode)
 								  (visual-line-mode)))
   :config
   (custom-set-faces
-   '(markdown-header-face ((t (:inherit font-lock-function-name-face :weight bold :family "variable-pitch"))))
-   '(markdown-header-face-1 ((t (:inherit markdown-header-face :height 1.8))))
-   '(markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.4))))
-   '(markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.2)))))
+   '(markdown-header-face
+	 ((t (:inherit font-lock-function-name-face
+				   :weight bold
+				   :family "variable-pitch"))))
+   '(markdown-header-face-1
+	 ((t (:inherit markdown-header-face
+				   :height 1.8))))
+   '(markdown-header-face-2
+	 ((t (:inherit markdown-header-face
+				   :height 1.4))))
+   '(markdown-header-face-3
+	 ((t (:inherit markdown-header-face
+				   :height 1.2)))))
 
   (setq markdown-hide-markup t)
   (setq markdown-header-scaling t)
@@ -306,58 +314,116 @@
   :ensure nil
   :init
   ;; Use the Quattro font only for org buffers
-  (add-hook 'org-mode-hook (lambda ()
-							 (defvar buffer-face-mode-face '(:family "iA Writer Quattro V"))
-							 (buffer-face-mode)
-							 (visual-line-mode)))
+  (add-hook 'org-mode-hook
+			(lambda ()
+			  (defvar buffer-face-mode-face
+				'(:family "iA Writer Quattro V"))
+			  (buffer-face-mode)
+			  (visual-line-mode)
+			  (org-indent-mode)))
   :config
   ;; Always be able to open the agenda through it's shortcut
   (global-set-key "\C-ca" 'org-agenda)
   (global-set-key "\C-cl" 'org-store-link)
-  (setq org-agenda-files '("~/org"))
-  ;; Add all the events Emacs knows about
-  (defvar org-agenda-include-diary t)
 
-  (defvar org-publish-project-alist
-	'(("org"
-	   :base-directory "~/org/"
-	   :publishing-function org-html-publish-to-html
-	   :publishing-directory "~/org-export"
-	   :section-numbers nil
-	   :with-toc nil
-	   :html-head "<link rel=\"stylesheet\"
-					href=\"/other/theme.css\"
-					type=\"text/css\"/>")
-	  ("web"
-	   :base-directory "~/org/web"
-	   :publishing-function org-html-publish-to-html
-	   :publishing-directory "~/org-export-web"
-	   :section-numbers nil
-	   :with-toc nil
-	   :html-head "<link rel=\"stylesheet\"
-					href=\"/other/theme.css\"
-					type=\"text/css\"/>"))))
+  (general-define-key
+   :states '(normal)
+   :keymaps 'override
+   :prefix "SPC"
+   "c" 'org-capture
+   "a" 'org-agenda)
+
+  (general-define-key
+   :states 'normal
+   :keymaps 'org-mode-map
+   :prefix ","
+   "i" 'org-clock-in
+   "o" 'org-clock-out
+   "s" 'org-insert-structure-template)
+
+  ;; When a TODO is set to a done state, record the time
+  (setq org-log-done 'time)
+
+  ;; Org agenda reads these files to fill itself
+  (setq org-agenda-files '("~/org"))
+
+  ;; Visually indent headings + content to their level
+  ;;(add-hook 'org-mode-hook 'org-indent-mode)
+
+  ;; Wrap lines so that things are easy to read
+  ;;(add-hook 'org-mode-hook 'visual-line-mode)
+
+  ;; Add all the events Emacs knows about
+  (defvar org-agenda-include-diary nil)
+
+  (setq org-tags-column 0)
+
+  ;; Disable confirmation before code execution
+  (setq org-confirm-babel-evaluate nil)
+
+  (defvar org-agenda-custom-commands
+	'(("A" "Big agenda"
+	   ((agenda "Big agenda"
+				((org-agenda-span 16)
+				 (org-agenda-start-on-weekday nil)
+				 (org-agenda-start-day "-2d")))
+		(todo "DOING")
+		(todo "TODO")))))
+
+  ;; https://www.gnu.org/software/emacs/manual/html_node/org/Setting-Tags.html
+  (setq org-tag-alist
+		(:startgroup . nil)
+		("work" . ?w)
+		("personal" . ?p)
+		(:endgroup . nil)
+		("birthday" . nil)
+		("meeting" . ?m))
+
+  (setq org-todo-keywords
+		'((sequence "TODO(t/!)" "WORKING-ON(w/!)" "BLOCK(b/!)"
+					"|" "DONE(d@/!)" "NOPE(n@/!)")))
+
+  (setq org-todo-keyword-faces
+		'(("TODO" . (:foreground "LightBlue" :weight bold))
+		  ("WORKING-ON" . (:foreground "HotPink" :weight bold))
+		  ("BLOCK" . (:foreground "thistle" :weight bold))
+		  ("DONE" . (:foreground "PaleGreen" :weight bold))
+		  ("NOPE" . (:foreground "aquamarine" :weight bold))))
+
+  (defvar org-capture-templates
+	'(("l" "Work Log Entry"
+	   entry (file+datetree "~/org/work-log.org")
+	   "* %?"
+	   :tree-type week
+	   :empty-lines 0)
+	  ("n" "Note"
+	   entry (file+headline "~/org/notes.org" "Random Notes")
+	   "** %?"
+	   :empty-lines 0)
+	  ("t" "Todo"
+	   entry (file+headline "~/org/todos.org" "General Tasks")
+	   "* TODO [#B] %?\n:Created: %T\n "
+	   :empty-lines 0)))
+
+  (set-face-attribute 'org-block nil :background
+					  (color-lighten-name (face-attribute 'default :background) 70))
+
+  (setq org-src-block-faces '(("clojure" (:background (color-lighten-name
+													   (face-attribute 'default :background) 70)))))
+
+  (defvar org-src-fontify-natively 't)
+
+
+  (custom-theme-set-faces
+   'user
+   `(org-level-4 ((t (:height 1.1))))
+   `(org-level-3 ((t (:height 1.2))))
+   `(org-level-2 ((t (:height 1.3))))
+   `(org-level-1 ((t (:height 1.5))))
+   `(org-document-title ((t (:height 1.6 :underline nil))))))
 
 (use-package org-protocol
   :ensure nil)
-
-(use-package org-roam
-  :ensure t
-  :custom
-  (org-roam-directory (file-truename "~/notes"))
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-		 ("C-c n f" . org-roam-node-find)
-		 ("C-c n g" . org-roam-graph)
-		 ("C-c n i" . org-roam-node-insert)
-		 ("C-c n c" . org-roam-capture)
-		 ;; Dailies
-		 ("C-c n j" . org-roam-dailies-capture-today))
-  :config
-  ;; If you're using a vertical completion framework, you might want a more informative completion interface
-  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-  (org-roam-db-autosync-mode)
-  ;; If using org-roam-protocol
-  (require 'org-roam-protocol))
 
 (use-package evil-org
   :diminish evil-org-mode
@@ -370,12 +436,19 @@
 (require 'evil-org-agenda)
 (evil-org-agenda-set-keys)
 
-;; }}}
-;; {{{ Lisp
+;;;;;;;; Lisp
+
 (use-package lispyville
   :hook ((emacs-lisp-mode . lispyville-mode)
 		 (clojure-mode . lispyville-mode)
-		 (scheme-mode . lispyville-mode)))
+		 (scheme-mode . lispyville-mode))
+  :config
+  (with-eval-after-load 'lispyville
+	(lispyville-set-key-theme
+	 '(operators
+	   c-w
+	   slurp/barf-cp
+	   additional))))
 
 (use-package slime
   :init
@@ -392,7 +465,24 @@
 (use-package clojure-mode)
 (use-package cider
   :config
-  (add-hook 'clojure-mode-hook #'cider-mode))
+  (add-hook 'clojure-mode-hook #'cider-mode)
+
+  (general-define-key
+   :states 'normal
+   :keymaps 'clojure-mode-map
+   :prefix ","
+   "d" 'cider-doc
+   "D" 'cider-clojuredocs)
+
+  ;; Changes the startup command to enrich classpath with java libraries.
+  ;; Should increase the amount of documentation support.
+  (defvar cider-enrich-classpath 't)
+  ;; Don't open a new buffer with the error
+  (setq cider-show-error-buffer nil))
+
+(use-package ob-clojure
+  :config
+  (setq org-babel-clojure-backend 'cider))
 
 (use-package inf-clojure
   :init
@@ -409,8 +499,8 @@
 (use-package geiser-chicken)
 (use-package racket-mode)
 
-;; }}}
-;; {{{ Programming language specific
+;;;;;;;; Programming language specific
+
 (use-package typescript-mode
   :mode "\\.tsx?$")
 
@@ -436,6 +526,10 @@
   :custom
   (flycheck-mode nil)
   )
-;; }}}
+
+(use-package poly-ansible)
+(use-package ansible-doc)
+(use-package company-ansible)
+
 (provide 'config)
 ;;; config.el ends here
