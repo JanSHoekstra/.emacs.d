@@ -371,13 +371,12 @@
 		(todo "TODO")))))
 
   ;; https://www.gnu.org/software/emacs/manual/html_node/org/Setting-Tags.html
-  (setq org-tag-alist
-		(:startgroup . nil)
-		("work" . ?w)
-		("personal" . ?p)
-		(:endgroup . nil)
-		("birthday" . nil)
-		("meeting" . ?m))
+  (setq org-tag-alist '((:startgroup . nil)
+						("work" . ?w)
+						("personal" . ?p)
+						(:endgroup . nil)
+						("birthday" . nil)
+						("meeting" . ?m)))
 
   (setq org-todo-keywords
 		'((sequence "TODO(t/!)" "WORKING-ON(w/!)" "BLOCK(b/!)"
