@@ -51,7 +51,10 @@
    ;; On long lines, keep the cursor in the middle of the screen (horizontally)
    hscroll-margin 9999
    ;; Symlinks to version controlled files should just be followed, don't ask.
-   vc-follow-symlinks t)
+   vc-follow-symlinks t
+   ;; I'm used to the key next to space behaving like 'alt'.
+   mac-command-modifier 'meta
+   ns-command-modifier 'meta)
 
   (setq-default indent-tabs-mode 0
 				tab-width 4
@@ -124,12 +127,18 @@
    :states '(normal)
    :keymaps 'override
    :prefix "SPC"
-   "1" 'delete-other-windows)
+   "1" 'delete-other-windows
+   "SPC" 'execute-extended-command)
   (general-define-key
    :states 'normal
    :keymaps 'org-mode-map
    :prefix ","
-   "t" 'org-todo))
+   "t" 'org-todo)
+  (general-define-key
+   :states 'normal
+   :keymaps 'elisp-mode
+   :prefix ","
+   "p" 'eval-defun))
 
 ;; Emacs native terminal, with decent behaviour and speed
 (use-package eat
@@ -227,7 +236,10 @@
   (define-key company-active-map (kbd "<tab>") 'company-complete-selection)
   (define-key company-active-map (kbd "C-<tab>") 'company-complete-common))
 
-(use-package flycheck :config (global-flycheck-mode +1))
+(use-package flycheck
+  :config
+  (global-flycheck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enable)))
 
 (use-package projectile
   :hook (prog-mode . projectile-mode)
@@ -279,7 +291,7 @@
 ;; EMacs Refactoring system
 (use-package emr
   :ensure t
-  :bind ("M-RET" . emr-show-refactor-menu))
+  :bind (("M-RET" . emr-show-refactor-menu)))
 
 ;;;;;;;; Writing
 
@@ -313,6 +325,7 @@
 (use-package org
   :ensure nil
   :init
+  :config
   ;; Use the Quattro font only for org buffers
   (add-hook 'org-mode-hook
 			(lambda ()
@@ -321,10 +334,11 @@
 			  (buffer-face-mode)
 			  (visual-line-mode)
 			  (org-indent-mode)))
-  :config
+
   ;; Always be able to open the agenda through it's shortcut
   (global-set-key "\C-ca" 'org-agenda)
   (global-set-key "\C-cl" 'org-store-link)
+
 
   (general-define-key
    :states '(normal)
@@ -412,7 +426,6 @@
 
   (defvar org-src-fontify-natively 't)
 
-
   (custom-theme-set-faces
    'user
    `(org-level-4 ((t (:height 1.1))))
@@ -471,7 +484,12 @@
    :keymaps 'clojure-mode-map
    :prefix ","
    "d" 'cider-doc
-   "D" 'cider-clojuredocs)
+   "D" 'cider-clojuredocs
+   "r" 'cider-run
+   "l" 'cider-load-buffer
+   "C" 'cider-jack-in
+   "p" 'cider-eval-defun-at-point
+   "e" 'cider-eval-last-sexp)
 
   ;; Changes the startup command to enrich classpath with java libraries.
   ;; Should increase the amount of documentation support.
@@ -529,6 +547,10 @@
 (use-package poly-ansible)
 (use-package ansible-doc)
 (use-package company-ansible)
+
+(use-package kotlin-mode)
+(use-package groovy-mode)
+
 
 (provide 'config)
 ;;; config.el ends here
