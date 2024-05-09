@@ -363,7 +363,7 @@
    :states '(normal)
    :keymaps 'override
    :prefix "SPC"
-   "c" 'org-capture
+   ;;"c" 'org-capture
    "a" 'org-agenda)
 
   (general-define-key
@@ -466,16 +466,35 @@
   (setq org-roam-directory (file-truename "~/org/roam"))
 
   (general-define-key
-   :states 'normal
+   :states '(normal)
+   :keymaps 'override
+   :prefix "SPC"
+   "r" 'org-roam-node-find)
+
+  (general-define-key
+   :states '(normal)
    :keymaps 'org-mode-map
    :prefix ","
    "r" 'org-roam-node-insert)
+
+  (setq org-roam-capture-templates
+		'(("d" "default" plain "%?"
+		   :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+							  "#+title: ${title}\n")
+		   :unnarrowed t)
+		  ("w" "work" plain "%?"
+		   :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
+							  "#+title: ${title}\n")
+		   :unnarrowed t)
+		  ("P" "personal" plain "%?"
+		   :target (file+head "personal/%<%Y%m%d%H%M%S>-${slug}.org"
+							  "#+title: ${title}\n")
+		   :unnarrowed t)))
 
   (org-roam-db-autosync-mode))
 
 (use-package org-roam-ui
   :config
-
   (setq org-roam-ui-sync-theme t
 		org-roam-ui-follow t
 		org-roam-ui-update-on-save t)
