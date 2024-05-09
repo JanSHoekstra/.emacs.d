@@ -9,6 +9,15 @@
 
 (use-package modus-themes :config (load-theme 'modus-vivendi-tinted 't))
 
+;;;;;;;; Helpers
+
+(defun ensure-directory-exists (directory)
+  "Ensure directory (as DIRECTORY) exists."
+  (unless (file-directory-p directory)
+	(make-directory directory t)))
+
+;;;;;;;; Base Emacs configuration
+
 (use-package emacs
   :diminish auto-revert-mode
   :ensure nil
@@ -124,11 +133,12 @@
   :init
   ;; Global keybinds
   (general-define-key
-   :states '(normal)
+   :states '(normal visual)
    :keymaps 'override
    :prefix "SPC"
    "1" 'delete-other-windows
-   "SPC" 'execute-extended-command)
+   "SPC" 'execute-extended-command
+   "c" 'comment-or-uncomment-region)
   (general-define-key
    :states 'normal
    :keymaps 'org-mode-map
@@ -175,18 +185,18 @@
   (setq dired-sidebar-use-term-integration t)
   (setq dired-sidebar-use-custom-font t))
 
-(use-package ido
-  :ensure nil
+(use-package vertico
+  :custom
+  (vertico-count 10)
+  (vertico-resize nil)
   :config
-  (ido-mode +1)
-  (setq ido-everywhere t
-		ido-enable-flex-matching t))
+  (vertico-mode))
 
-(use-package ido-completing-read+ :config (ido-ubiquitous-mode +1))
-
-(use-package flx-ido :config (flx-ido-mode +1))
-
-(use-package flx)
+(use-package orderless
+  :custom
+  (completion-styles '(orderless))
+  ;;(orderless-matching-styles '(orderless-flex))
+  (orderless-matching-styles '(orderless-literal)))
 
 (use-package exec-path-from-shell
   :ensure t
@@ -203,7 +213,6 @@
   (delight 'centered-cursor-mode nil)
   (delight 'hs-minor-mode nil "hide-show")
   (delight 'company-mode nil "company"))
-
 ;;;;;;;; General Programming
 
 (use-package elec-pair
@@ -239,7 +248,14 @@
 (use-package flycheck
   :config
   (global-flycheck-mode +1)
-  (setq flycheck-check-syntax-automatically '(save mode-enable)))
+  ;;(setq flycheck-check-syntax-automatically '(save mode-enable))
+  (setq flycheck-highlighting-mode 'lines))
+
+(use-package flycheck-inline
+  :config
+  (with-eval-after-load 'flycheck
+	(add-hook 'flycheck-mode-hook #'flycheck-inline-mode))
+  (setq flycheck-display-errors-delay 0))
 
 (use-package projectile
   :hook (prog-mode . projectile-mode)
@@ -271,6 +287,7 @@
   (add-hook 'haskell-mode-hook 'eglot-ensure)
   (add-hook 'clojure-mode-hook 'eglot-ensure)
   (add-hook 'scala-mode-hook 'eglot-ensure)
+  (add-hook 'kotlin-mode-hook 'eglot-ensure)
   (setq-default eglot-workspace-configuration
 				'((haskell
 				   (plugin
@@ -286,7 +303,11 @@
   :ensure nil
   :config
   ;; When eldoc buffer is open, don't show it in minibuffer anymore.
-  (setq eldoc-echo-area-prefer-doc-buffer t))
+  (setq eldoc-echo-area-prefer-doc-buffer t)
+  (add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
+  (add-hook 'lisp-interaction-mode-hook 'eldoc-mode)
+  (add-hook 'ielm-mode-hook 'eldoc-mode)
+  )
 
 ;; EMacs Refactoring system
 (use-package emr
@@ -324,7 +345,6 @@
 
 (use-package org
   :ensure nil
-  :init
   :config
   ;; Use the Quattro font only for org buffers
   (add-hook 'org-mode-hook
@@ -338,7 +358,6 @@
   ;; Always be able to open the agenda through it's shortcut
   (global-set-key "\C-ca" 'org-agenda)
   (global-set-key "\C-cl" 'org-store-link)
-
 
   (general-define-key
    :states '(normal)
@@ -359,13 +378,16 @@
   (setq org-log-done 'time)
 
   ;; Org agenda reads these files to fill itself
-  (setq org-agenda-files '("~/org"))
+  (setq org-agenda-files '("~/org/notes"))
 
   ;; Visually indent headings + content to their level
   ;;(add-hook 'org-mode-hook 'org-indent-mode)
 
   ;; Wrap lines so that things are easy to read
   ;;(add-hook 'org-mode-hook 'visual-line-mode)
+
+  ;; Follow links in same buffer
+  (setf (cdr (assoc 'file org-link-frame-setup)) 'find-file)
 
   ;; Add all the events Emacs knows about
   (defvar org-agenda-include-diary nil)
@@ -418,8 +440,8 @@
 	   "* TODO [#B] %?\n:Created: %T\n "
 	   :empty-lines 0)))
 
-  (set-face-attribute 'org-block nil :background
-					  (color-lighten-name (face-attribute 'default :background) 70))
+  ;;(set-face-attribute 'org-block nil :background
+  ;;(color-lighten-name (face-attribute 'default :background) 70))
 
   (setq org-src-block-faces '(("clojure" (:background (color-lighten-name
 													   (face-attribute 'default :background) 70)))))
@@ -432,10 +454,37 @@
    `(org-level-3 ((t (:height 1.2))))
    `(org-level-2 ((t (:height 1.3))))
    `(org-level-1 ((t (:height 1.5))))
-   `(org-document-title ((t (:height 1.6 :underline nil))))))
+   `(org-document-title ((t (:height 1.6 :underline nil)))))
+  )
 
 (use-package org-protocol
   :ensure nil)
+
+(use-package org-roam
+  :config
+  (ensure-directory-exists "~/org/roam")
+  (setq org-roam-directory (file-truename "~/org/roam"))
+
+  (general-define-key
+   :states 'normal
+   :keymaps 'org-mode-map
+   :prefix ","
+   "r" 'org-roam-node-insert)
+
+  (org-roam-db-autosync-mode))
+
+(use-package org-roam-ui
+  :config
+
+  (setq org-roam-ui-sync-theme t
+		org-roam-ui-follow t
+		org-roam-ui-update-on-save t)
+
+  (general-define-key
+   :states '(normal)
+   :keymaps 'override
+   :prefix "SPC"
+   "R" 'org-roam-ui-open))
 
 (use-package evil-org
   :diminish evil-org-mode
@@ -445,8 +494,11 @@
   (add-hook 'evil-org-mode-hook
 			(lambda () (evil-org-set-key-theme))))
 
-(require 'evil-org-agenda)
-(evil-org-agenda-set-keys)
+(use-package org-jira
+  :config
+  (ensure-directory-exists "~/org/jira")
+  (setq org-jira-working-dir "~/org/jira")
+  (setq jiralib-url (base64-decode-string "aHR0cHM6Ly9qaXJhLm9udHdpa2tlbC5sb2NhbAo=")))
 
 ;;;;;;;; Lisp
 
@@ -497,10 +549,6 @@
   ;; Don't open a new buffer with the error
   (setq cider-show-error-buffer nil))
 
-(use-package ob-clojure
-  :config
-  (setq org-babel-clojure-backend 'cider))
-
 (use-package inf-clojure
   :init
   (defun cljs-node-repl ()
@@ -515,6 +563,11 @@
 (use-package geiser-guile)
 (use-package geiser-chicken)
 (use-package racket-mode)
+(use-package emacs
+  :ensure nil
+  :config
+  (add-hook 'emacs-lisp-mode-hook (lambda () (evil-close-folds)))
+  )
 
 ;;;;;;;; Programming language specific
 
@@ -550,7 +603,6 @@
 
 (use-package kotlin-mode)
 (use-package groovy-mode)
-
 
 (provide 'config)
 ;;; config.el ends here
