@@ -192,6 +192,18 @@
   :config
   (vertico-mode))
 
+(use-package vertico-directory
+  :after vertico
+  :ensure nil
+  :demand
+  ;; More convenient directory navigation commands
+  :bind (:map vertico-map
+			  ("RET"   . vertico-directory-enter)
+			  ("DEL"   . vertico-directory-delete-char)
+			  ("M-DEL" . vertico-directory-delete-word))
+  ;; Tidy shadowed file names
+  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+
 (use-package orderless
   :custom
   (completion-styles '(orderless))
@@ -213,6 +225,7 @@
   (delight 'centered-cursor-mode nil)
   (delight 'hs-minor-mode nil "hide-show")
   (delight 'company-mode nil "company"))
+
 ;;;;;;;; General Programming
 
 (use-package elec-pair
@@ -257,8 +270,15 @@
 	(add-hook 'flycheck-mode-hook #'flycheck-inline-mode))
   (setq flycheck-display-errors-delay 0))
 
+(use-package flycheck-eglot
+  :ensure t
+  :after (flycheck eglot)
+  :custom (flycheck-eglot-exclusive nil)
+  :config
+  (global-flycheck-eglot-mode 1))
+
 (use-package projectile
-  :hook (prog-mode . projectile-mode)
+  ;;:hook (prog-mode . projectile-mode)
   :config
   (define-key projectile-mode-map (kbd "<f5>") 'projectile-compile-project)
   (define-key projectile-mode-map (kbd "<f6>") 'projectile-run-project))
@@ -288,6 +308,7 @@
   (add-hook 'clojure-mode-hook 'eglot-ensure)
   (add-hook 'scala-mode-hook 'eglot-ensure)
   (add-hook 'kotlin-mode-hook 'eglot-ensure)
+  (setq eglot-events-buffer-size 0)
   (setq-default eglot-workspace-configuration
 				'((haskell
 				   (plugin
@@ -364,7 +385,8 @@
    :keymaps 'override
    :prefix "SPC"
    ;;"c" 'org-capture
-   "a" 'org-agenda)
+   "a" 'org-agenda
+   "o" 'org-open-at-point-global)
 
   (general-define-key
    :states 'normal
@@ -519,6 +541,8 @@
   (setq org-jira-working-dir "~/org/jira")
   (setq jiralib-url (base64-decode-string "aHR0cHM6Ly9qaXJhLm9udHdpa2tlbC5sb2NhbAo=")))
 
+(use-package org-cliplink)
+
 ;;;;;;;; Lisp
 
 (use-package lispyville
@@ -526,6 +550,12 @@
 		 (clojure-mode . lispyville-mode)
 		 (scheme-mode . lispyville-mode))
   :config
+
+  ;; https://github.com/noctuid/lispyville/issues/314
+  ;; https://github.com/abo-abo/lispy/issues/305
+  (setq lispy-left "[([{\"]")
+  (setq lispy-right "[])}\"]")
+
   (with-eval-after-load 'lispyville
 	(lispyville-set-key-theme
 	 '(operators
@@ -590,15 +620,12 @@
 
 ;;;;;;;; Programming language specific
 
-(use-package typescript-mode
-  :mode "\\.tsx?$")
-
-(use-package tide
-  :ensure t
-  :after (typescript-mode company flycheck)
-  :hook ((typescript-mode . tide-setup)
-		 (typescript-mode . tide-hl-identifier-mode)
-		 (before-save . tide-format-before-save)))
+(use-package treesit-auto
+  :custom
+  (treesit-auto-install 'prompt)
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  :config
+  (global-treesit-auto-mode))
 
 (use-package plantuml-mode
   :custom
