@@ -242,18 +242,6 @@ apps are not started from a shell."
   (delight 'hs-minor-mode nil "hide-show")
   (delight 'company-mode nil "company"))
 
-(use-package pinentry
-  :config
-  (setq epg-pinentry-mode 'loopback)
-  (pinentry-start))
-
-(use-package epa
-  :ensure nil
-  :config
-  (epa-file-enable))
-
-(use-package pass)
-
 ;;;;;;;; General Programming
 
 (use-package elec-pair
