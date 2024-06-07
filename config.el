@@ -11,6 +11,18 @@
 
 ;;;;;;;; Helpers
 
+(defun set-exec-path-from-shell-PATH ()
+  "Set up Emacs `exec-path` and PATH environment variable to match the shell.
+This is particularly useful under Mac OS X and macOS, where GUI
+apps are not started from a shell."
+  (interactive)
+  (let ((path-from-shell (replace-regexp-in-string
+						  "[ \t\n]*$" "" (shell-command-to-string
+										  "$SHELL --login -c 'echo $PATH'"
+										  ))))
+	(setenv "PATH" path-from-shell)
+	(setq exec-path (split-string path-from-shell path-separator))))
+
 (defun ensure-directory-exists (directory)
   "Ensure directory (as DIRECTORY) exists."
   (unless (file-directory-p directory)
@@ -23,6 +35,7 @@
   :ensure nil
   :config
 
+  (setenv "PATH" (concat (getenv "PATH") ":/opt/homebrew/bin"))
   (if (not (eq system-type 'windows-nt))
 	  (progn
 		(set-face-attribute 'default
@@ -102,7 +115,10 @@
 		(shell-command-to-string "wl-paste -n | tr -d \r")))
 
 	(setq interprogram-cut-function 'wl-copy)
-	(setq interprogram-paste-function 'wl-paste)))
+	(setq interprogram-paste-function 'wl-paste))
+
+  (set-exec-path-from-shell-PATH)
+  )
 
 ;;;;;;;; Folds
 
@@ -225,6 +241,18 @@
   (delight 'centered-cursor-mode nil)
   (delight 'hs-minor-mode nil "hide-show")
   (delight 'company-mode nil "company"))
+
+(use-package pinentry
+  :config
+  (setq epg-pinentry-mode 'loopback)
+  (pinentry-start))
+
+(use-package epa
+  :ensure nil
+  :config
+  (epa-file-enable))
+
+(use-package pass)
 
 ;;;;;;;; General Programming
 
@@ -534,14 +562,6 @@
   (add-hook 'org-mode-hook 'evil-org-mode)
   (add-hook 'evil-org-mode-hook
 			(lambda () (evil-org-set-key-theme))))
-
-(use-package org-jira
-  :config
-  (ensure-directory-exists "~/org/jira")
-  (setq org-jira-working-dir "~/org/jira")
-  (setq jiralib-url (base64-decode-string "aHR0cHM6Ly9qaXJhLm9udHdpa2tlbC5sb2NhbAo=")))
-
-(use-package org-cliplink)
 
 ;;;;;;;; Lisp
 
