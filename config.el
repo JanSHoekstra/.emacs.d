@@ -241,6 +241,10 @@ apps are not started from a shell."
   (delight 'centered-cursor-mode nil)
   (delight 'hs-minor-mode nil "hide-show")
   (delight 'company-mode nil "company"))
+(use-package epg
+  :ensure nil
+  :config
+  (setq epg-pinentry-mode 'loopback))
 
 ;;;;;;;; General Programming
 
