@@ -149,7 +149,7 @@ apps are not started from a shell."
   :init
   ;; Global keybinds
   (general-define-key
-   :states '(normal visual)
+   :states '(normal visual motion)
    :keymaps 'override
    :prefix "SPC"
    "1" 'delete-other-windows
@@ -632,7 +632,6 @@ apps are not started from a shell."
   :custom
   (treesit-auto-install 'prompt)
   (treesit-auto-add-to-auto-mode-alist 'all)
-  :config
   (global-treesit-auto-mode))
 
 (use-package plantuml-mode
@@ -657,6 +656,9 @@ apps are not started from a shell."
 
 (use-package kotlin-mode)
 (use-package groovy-mode)
+
+(use-package rustic)
+(use-package go-mode)
 
 (provide 'config)
 ;;; config.el ends here
