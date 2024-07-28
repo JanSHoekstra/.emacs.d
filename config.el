@@ -246,6 +246,15 @@ apps are not started from a shell."
   :config
   (setq epg-pinentry-mode 'loopback))
 
+(use-package keychain-environment
+  :config
+  (keychain-refresh-environment))
+
+;;;;;;;; Noncritical non-programming
+
+(use-package pomm)
+
+
 ;;;;;;;; General Programming
 
 (use-package elec-pair
@@ -322,6 +331,7 @@ apps are not started from a shell."
 
 (use-package eglot
   :ensure nil
+  :hook ((eglot-managed-mode . mp-eglot-eldoc))
   :config
   (global-set-key "\C-cl" 'eglot)
   (add-hook 'haskell-mode-hook 'eglot-ensure)
@@ -345,9 +355,14 @@ apps are not started from a shell."
   :config
   ;; When eldoc buffer is open, don't show it in minibuffer anymore.
   (setq eldoc-echo-area-prefer-doc-buffer t)
+  (setq eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
   (add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
   (add-hook 'lisp-interaction-mode-hook 'eldoc-mode)
   (add-hook 'ielm-mode-hook 'eldoc-mode)
+
+  (add-to-list 'display-buffer-alist
+			   '("^\\*eldoc for" display-buffer-at-bottom
+				 (window-height . 10)))
   )
 
 ;; EMacs Refactoring system
@@ -608,7 +623,8 @@ apps are not started from a shell."
   ;; Should increase the amount of documentation support.
   (defvar cider-enrich-classpath 't)
   ;; Don't open a new buffer with the error
-  (setq cider-show-error-buffer nil))
+  (setq cider-show-error-buffer nil)
+  (setq cider-eldoc-display-context-dependent-info t))
 
 (use-package inf-clojure
   :init
