@@ -10,18 +10,17 @@
 (use-package modus-themes :config (load-theme 'modus-vivendi-tinted 't))
 
 ;;;;;;;; Helpers
-
 (defun set-exec-path-from-shell-PATH ()
 	"Set up Emacs `exec-path` and PATH environment variable to match the shell.
 This is particularly useful under Mac OS X and macOS, where GUI
 apps are not started from a shell."
 	(interactive)
 	(let ((path-from-shell (replace-regexp-in-string
-							"[ \t\n]*$" "" (shell-command-to-string
-											"$SHELL --login -c 'echo $PATH'"
-											))))
-	(setenv "PATH" path-from-shell)
-	(setq exec-path (split-string path-from-shell path-separator))))
+													"[ \t\n]*$" "" (shell-command-to-string
+																					"$SHELL --login -c 'echo $PATH'"
+																					))))
+		(setenv "PATH" path-from-shell)
+		(setq exec-path (split-string path-from-shell path-separator))))
 
 (defun ensure-directory-exists (directory)
 	"Ensure directory (as DIRECTORY) exists."
@@ -38,14 +37,18 @@ apps are not started from a shell."
 
 	(setenv "PATH" (concat (getenv "PATH") ":/opt/homebrew/bin"))
 	(if (not (eq system-type 'windows-nt))
-		(progn
+			(progn
+				(set-face-attribute 'default
+														nil
+														:family "iA Writer Mono S"
+														:height 120)
+				(set-face-attribute 'mode-line
+														nil
+														:family "iA Writer Quattro S"))
 		(set-face-attribute 'default
-							nil
-							:family "iA Writer Mono S"
-							:height 120)
-		(set-face-attribute 'mode-line
-							nil
-							:family "iA Writer Quattro S")))
+												nil
+												:family "Consolas"
+												:height 140))
 
 	;; Disable UI nonsense.
 	(tool-bar-mode 0)
@@ -80,16 +83,16 @@ apps are not started from a shell."
 	 ns-command-modifier 'meta)
 
 	(setq-default indent-tabs-mode 0
-				tab-width 2
-				truncate-lines 1
-				truncate-partial-width-windows 1)
+								tab-width 2
+								truncate-lines 1
+								truncate-partial-width-windows 1)
 
 	(defun switch-to-minibuffer ()
-	"Switch to minibuffer window."
-	(interactive)
-	(if (active-minibuffer-window)
-		(select-window (active-minibuffer-window))
-		(error "Minibuffer is not active")))
+		"Switch to minibuffer window."
+		(interactive)
+		(if (active-minibuffer-window)
+				(select-window (active-minibuffer-window))
+			(error "Minibuffer is not active")))
 
 	(global-set-key "\C-cm" 'switch-to-minibuffer) ;; Bind to `C-c o'
 
@@ -99,27 +102,32 @@ apps are not started from a shell."
 	;; Make use of wayland clipboard when running cli client in Wayland
 	;; https://www.emacswiki.org/emacs/CopyAndPaste
 	(when (string= (getenv "XDG_SESSION_TYPE") "wayland")
-	(defvar wl-copy-process)
-	(setq wl-copy-process nil)
+		(defvar wl-copy-process)
+		(setq wl-copy-process nil)
 
-	(defun wl-copy (text)
-		(setq wl-copy-process (make-process :name "wl-copy"
-											:buffer nil
-											:command '("wl-copy" "-f" "-n")
-											:connection-type 'pipe))
-		(process-send-string wl-copy-process text)
-		(process-send-eof wl-copy-process))
+		(defun wl-copy (text)
+			(setq wl-copy-process (make-process :name "wl-copy"
+																					:buffer nil
+																					:command '("wl-copy" "-f" "-n")
+																					:connection-type 'pipe))
+			(process-send-string wl-copy-process text)
+			(process-send-eof wl-copy-process))
 
-	(defun wl-paste ()
-		(if (and wl-copy-process (process-live-p wl-copy-process))
-			nil ; should return nil if we're the current paste owner
-		(shell-command-to-string "wl-paste -n | tr -d \r")))
+		(defun wl-paste ()
+			(if (and wl-copy-process (process-live-p wl-copy-process))
+					nil     ; should return nil if we're the current paste owner
+				(shell-command-to-string "wl-paste -n | tr -d \r")))
 
-	(setq interprogram-cut-function 'wl-copy)
-	(setq interprogram-paste-function 'wl-paste))
+		(setq interprogram-cut-function 'wl-copy)
+		(setq interprogram-paste-function 'wl-paste))
 
-	(set-exec-path-from-shell-PATH)
-	)
+	(when (eq system-type 'windows-nt)
+		(setq user-emacs-directory (format  "C:/Users/%s/AppData/Roaming/.emacs.d" user-login-name))
+		(setq default-directory (format "C:/Users/%s/" user-login-name))
+		(setenv "HOME" (format "C:/Users/%s/" user-login-name)))
+
+	(unless (eq system-type 'windows-nt)
+		(set-exec-path-from-shell-PATH)))
 
 ;;;;;;;; Folds
 
@@ -150,7 +158,7 @@ apps are not started from a shell."
 	:init
 	;; Global keybinds
 	(general-define-key
-	 :states '(normal visual)
+	 :states '(normal visual motion)
 	 :keymaps 'override
 	 :prefix "SPC"
 	 "1" 'delete-other-windows
@@ -181,8 +189,8 @@ apps are not started from a shell."
 	:ensure nil
 	:config
 	(setq confirm-kill-processes nil
-		create-lockfiles nil
-		make-backup-files nil))
+				create-lockfiles nil
+				make-backup-files nil))
 
 (use-package dired-sidebar
 	:bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
@@ -190,9 +198,9 @@ apps are not started from a shell."
 	:commands (dired-sidebar-toggle-sidebar)
 	:init
 	(add-hook 'dired-sidebar-mode-hook
-			(lambda ()
-				(unless (file-remote-p default-directory)
-				(auto-revert-mode))))
+						(lambda ()
+							(unless (file-remote-p default-directory)
+								(auto-revert-mode))))
 	:config
 	(push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
 	(push 'rotate-windows dired-sidebar-toggle-hidden-commands)
@@ -209,6 +217,18 @@ apps are not started from a shell."
 	:config
 	(vertico-mode))
 
+(use-package vertico-directory
+	:after vertico
+	:ensure nil
+	:demand
+	;; More convenient directory navigation commands
+	:bind (:map vertico-map
+							("RET"   . vertico-directory-enter)
+							("DEL"   . vertico-directory-delete-char)
+							("M-DEL" . vertico-directory-delete-word))
+	;; Tidy shadowed file names
+	:hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+
 (use-package orderless
 	:custom
 	(completion-styles '(orderless))
@@ -219,7 +239,7 @@ apps are not started from a shell."
 	:ensure t
 	:config
 	(when (memq window-system '(mac ns x))
-	(exec-path-from-shell-initialize)))
+		(exec-path-from-shell-initialize)))
 
 (use-package delight
 	:config
@@ -252,20 +272,20 @@ apps are not started from a shell."
 (use-package whitespace
 	:ensure nil
 	:config (defun clean-whitespace-in-prog-buffers ()
-			(when (derived-mode-p major-mode)
-				(whitespace-cleanup)))
+						(when (derived-mode-p major-mode)
+							(whitespace-cleanup)))
 	:hook (before-save . clean-whitespace-in-prog-buffers))
 
 (use-package company
 	:hook (prog-mode . company-mode)
 	:config
 	(setq company-minimum-prefix-length 1
-		company-idle-delay 0.1
-		company-selection-wrap-around t
-		company-tooltip-align-annotations t
-		;; show tooltip even for single candidate
-		company-frontends '(company-pseudo-tooltip-frontend
-							company-echo-metadata-frontend))
+				company-idle-delay 0.1
+				company-selection-wrap-around t
+				company-tooltip-align-annotations t
+				;; show tooltip even for single candidate
+				company-frontends '(company-pseudo-tooltip-frontend
+														company-echo-metadata-frontend))
 	(define-key company-active-map (kbd "C-n") 'company-select-next)
 	(define-key company-active-map (kbd "C-p") 'company-select-previous)
 	(define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
@@ -284,11 +304,18 @@ apps are not started from a shell."
 (use-package flycheck-inline
 	:config
 	(with-eval-after-load 'flycheck
-	(add-hook 'flycheck-mode-hook #'flycheck-inline-mode))
+		(add-hook 'flycheck-mode-hook #'flycheck-inline-mode))
 	(setq flycheck-display-errors-delay 0))
 
+(use-package flycheck-eglot
+	:ensure t
+	:after (flycheck eglot)
+	:custom (flycheck-eglot-exclusive nil)
+	:config
+	(global-flycheck-eglot-mode 1))
+
 (use-package projectile
-	:hook (prog-mode . projectile-mode)
+	;;:hook (prog-mode . projectile-mode)
 	:config
 	(define-key projectile-mode-map (kbd "<f5>") 'projectile-compile-project)
 	(define-key projectile-mode-map (kbd "<f6>") 'projectile-run-project))
@@ -296,7 +323,7 @@ apps are not started from a shell."
 (use-package centered-cursor-mode
 	:hook (prog-mode . centered-cursor-mode)
 	:config (setq ccm-recenter-at-end-of-file t
-				ccm-recenter-end-of-file t))
+								ccm-recenter-end-of-file t))
 
 (use-package rainbow-delimiters
 	:config
@@ -306,23 +333,25 @@ apps are not started from a shell."
 	:config
 	(global-set-key "\C-ci" 'aggressive-indent-mode)
 	:hook ((prog-mode . aggressive-indent-mode)
-		 (slime-repl-mode . aggressive-indent-mode)
-		 (scheme-mode . aggressive-indent-mode)
-		 (emacs-lisp-mode . aggressive-indent-mode)))
+				 (slime-repl-mode . aggressive-indent-mode)
+				 (scheme-mode . aggressive-indent-mode)
+				 (emacs-lisp-mode . aggressive-indent-mode)))
 
 (use-package eglot
 	:ensure nil
+	:hook ((eglot-managed-mode . mp-eglot-eldoc))
 	:config
 	(global-set-key "\C-cl" 'eglot)
 	(add-hook 'haskell-mode-hook 'eglot-ensure)
 	(add-hook 'clojure-mode-hook 'eglot-ensure)
 	(add-hook 'scala-mode-hook 'eglot-ensure)
 	(add-hook 'kotlin-mode-hook 'eglot-ensure)
+	(setq eglot-events-buffer-size 0)
 	(setq-default eglot-workspace-configuration
-				'((haskell
-					 (plugin
-					(stan
-					 (globalOn . :json-false))))))  ;; disable stan
+								'((haskell
+									 (plugin
+										(stan
+										 (globalOn . :json-false))))))  ;; disable stan
 	:custom
 	;; shutdown language server after closing last file
 	(eglot-autoshutdown t)
@@ -334,10 +363,14 @@ apps are not started from a shell."
 	:config
 	;; When eldoc buffer is open, don't show it in minibuffer anymore.
 	(setq eldoc-echo-area-prefer-doc-buffer t)
+	(setq eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
 	(add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
 	(add-hook 'lisp-interaction-mode-hook 'eldoc-mode)
 	(add-hook 'ielm-mode-hook 'eldoc-mode)
-	)
+
+	(add-to-list 'display-buffer-alist
+							 '("^\\*eldoc for" display-buffer-at-bottom
+								 (window-height . 10))))
 
 ;; EMacs Refactoring system
 (use-package emr
@@ -349,25 +382,25 @@ apps are not started from a shell."
 (use-package markdown-mode
 	:init
 	(add-hook 'markdown-mode-hook (lambda ()
-									(defvar buffer-face-mode-face
-									'(:family "iA Writer Quattro V"))
-									(buffer-face-mode)
-									(visual-line-mode)))
+																	(defvar buffer-face-mode-face
+																		'(:family "iA Writer Quattro V"))
+																	(buffer-face-mode)
+																	(visual-line-mode)))
 	:config
 	(custom-set-faces
 	 '(markdown-header-face
-	 ((t (:inherit font-lock-function-name-face
-					 :weight bold
-					 :family "variable-pitch"))))
+		 ((t (:inherit font-lock-function-name-face
+									 :weight bold
+									 :family "variable-pitch"))))
 	 '(markdown-header-face-1
-	 ((t (:inherit markdown-header-face
-					 :height 1.8))))
+		 ((t (:inherit markdown-header-face
+									 :height 1.8))))
 	 '(markdown-header-face-2
-	 ((t (:inherit markdown-header-face
-					 :height 1.4))))
+		 ((t (:inherit markdown-header-face
+									 :height 1.4))))
 	 '(markdown-header-face-3
-	 ((t (:inherit markdown-header-face
-					 :height 1.2)))))
+		 ((t (:inherit markdown-header-face
+									 :height 1.2)))))
 
 	(setq markdown-hide-markup t)
 	(setq markdown-header-scaling t)
@@ -394,7 +427,8 @@ apps are not started from a shell."
 	 :keymaps 'override
 	 :prefix "SPC"
 	 ;;"c" 'org-capture
-	 "a" 'org-agenda)
+	 "a" 'org-agenda
+	 "o" 'org-open-at-point-global)
 
 	(general-define-key
 	 :states 'normal
@@ -492,7 +526,7 @@ apps are not started from a shell."
 													'(("^ *\\([-]\\) "
 														 (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 	)
-
+)
 (use-package org-protocol
 	:ensure nil)
 
@@ -514,26 +548,71 @@ apps are not started from a shell."
 	 "r" 'org-roam-node-insert)
 
 	(setq org-roam-capture-templates
-		'(("d" "default" plain "%?"
-			 :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-								"#+title: ${title}\n")
-			 :unnarrowed t)
-			("w" "work" plain "%?"
-			 :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
-								"#+title: ${title}\n")
-			 :unnarrowed t)
-			("P" "personal" plain "%?"
-			 :target (file+head "personal/%<%Y%m%d%H%M%S>-${slug}.org"
-								"#+title: ${title}\n")
-			 :unnarrowed t)))
+				'(("d" "default" plain "%?"
+					 :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+															"#+title: ${title}\n")
+					 :unnarrowed t)
+					("w" "work" plain "%?"
+					 :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
+															"#+title: ${title}\n")
+					 :unnarrowed t)
+					("P" "personal" plain "%?"
+					 :target (file+head "personal/%<%Y%m%d%H%M%S>-${slug}.org"
+															"#+title: ${title}\n")
+					 :unnarrowed t)))
 
 	(org-roam-db-autosync-mode))
 
 (use-package org-roam-ui
 	:config
 	(setq org-roam-ui-sync-theme t
-		org-roam-ui-follow t
-		org-roam-ui-update-on-save t)
+				org-roam-ui-follow t
+				org-roam-ui-update-on-save t)
+
+	(general-define-key
+	 :states '(normal)
+	 :keymaps 'override
+	 :prefix "SPC"
+	 "R" 'org-roam-ui-open))
+
+(use-package org-roam
+	:config
+	(ensure-directory-exists "~/org/roam")
+	(setq org-roam-directory (file-truename "~/org/roam"))
+
+	(general-define-key
+	 :states '(normal)
+	 :keymaps 'override
+	 :prefix "SPC"
+	 "r" 'org-roam-node-find)
+
+	(general-define-key
+	 :states '(normal)
+	 :keymaps 'org-mode-map
+	 :prefix ","
+	 "r" 'org-roam-node-insert)
+
+	(setq org-roam-capture-templates
+				'(("d" "default" plain "%?"
+					 :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+															"#+title: ${title}\n")
+					 :unnarrowed t)
+					("w" "work" plain "%?"
+					 :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
+															"#+title: ${title}\n")
+					 :unnarrowed t)
+					("P" "personal" plain "%?"
+					 :target (file+head "personal/%<%Y%m%d%H%M%S>-${slug}.org"
+															"#+title: ${title}\n")
+					 :unnarrowed t)))
+
+	(org-roam-db-autosync-mode))
+
+(use-package org-roam-ui
+	:config
+	(setq org-roam-ui-sync-theme t
+				org-roam-ui-follow t
+				org-roam-ui-update-on-save t)
 
 	(general-define-key
 	 :states '(normal)
@@ -547,7 +626,7 @@ apps are not started from a shell."
 	:config
 	(add-hook 'org-mode-hook 'evil-org-mode)
 	(add-hook 'evil-org-mode-hook
-			(lambda () (evil-org-set-key-theme))))
+						(lambda () (evil-org-set-key-theme))))
 
 (use-package org-jira
 	:config
@@ -574,6 +653,12 @@ apps are not started from a shell."
 				 (clojure-mode . lispyville-mode)
 				 (scheme-mode . lispyville-mode))
 	:config
+
+	;; https://github.com/noctuid/lispyville/issues/314
+	;; https://github.com/abo-abo/lispy/issues/305
+	(setq lispy-left "[([{\"]")
+	(setq lispy-right "[])}\"]")
+
 	(with-eval-after-load 'lispyville
 		(lispyville-set-key-theme
 		 '(operators
@@ -614,7 +699,8 @@ apps are not started from a shell."
 	;; Should increase the amount of documentation support.
 	(defvar cider-enrich-classpath 't)
 	;; Don't open a new buffer with the error
-	(setq cider-show-error-buffer nil))
+	(setq cider-show-error-buffer nil)
+	(setq cider-eldoc-display-context-dependent-info t))
 
 (use-package inf-clojure
 	:init
@@ -633,13 +719,15 @@ apps are not started from a shell."
 (use-package emacs
 	:ensure nil
 	:config
-	(add-hook 'emacs-lisp-mode-hook (lambda () (evil-close-folds)))
-	)
+	(add-hook 'emacs-lisp-mode-hook (lambda () (evil-close-folds))))
 
 ;;;;;;;; Programming language specific
 
-(use-package typescript-mode
-	:mode "\\.tsx?$")
+(use-package treesit-auto
+	:custom
+	(treesit-auto-install 'prompt)
+	(treesit-auto-add-to-auto-mode-alist 'all)
+	(global-treesit-auto-mode))
 
 (use-package plantuml-mode
 	:custom
@@ -669,9 +757,10 @@ apps are not started from a shell."
 				tab-width 2
 				truncate-lines 1
 				truncate-partial-width-windows 1)
-	(indent-tabs-mode nil)
-	)
+	(indent-tabs-mode nil))
 
+(use-package rustic)
+(use-package go-mode)
 
 (provide 'config)
 ;;; config.el ends here
