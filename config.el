@@ -165,7 +165,10 @@ apps are not started from a shell."
 	:defer nil
 	:config
 	(when (memq window-system '(mac ns x))
-		(exec-path-from-shell-initialize)))
+		(exec-path-from-shell-initialize)
+		(when (eq system-type 'darwin)
+			(exec-path-from-shell-copy-env "SSH_AGENT_PID")
+			(exec-path-from-shell-copy-env "SSH_AUTH_SOCK"))))
 
 ;;;;;;;; Folds
 
