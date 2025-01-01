@@ -138,6 +138,9 @@ apps are not started from a shell."
 		(setq default-directory (format "C:/Users/%s/" user-login-name))
 		(setenv "HOME" (format "C:/Users/%s/" user-login-name)))
 
+	(when (eq system-type 'darwin)
+		(setq-default explicit-shell-file-name "/opt/homebrew/bin/bash"))
+
 	(unless (eq system-type 'windows-nt)
 		(set-exec-path-from-shell-PATH)))
 
