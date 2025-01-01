@@ -171,6 +171,7 @@ apps are not started from a shell."
 	:defer nil
 	:init
 	(setq evil-undo-system 'undo-redo)
+	(setq evil-want-minibuffer t)
 	(evil-mode)
 	(global-set-key (kbd "<escape>") 'keyboard-escape-quit))
 
