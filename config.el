@@ -7,7 +7,11 @@
 
 ;;;;;;;; Emacs
 
-(use-package modus-themes :config (load-theme 'modus-vivendi-tinted 't))
+;; Please just shut up for a moment while starting up
+;; Maybe replace with filtering if this proves a problem down the line:
+;; https://www.emacswiki.org/emacs/EchoArea#h5o-3
+(setq inhibit-message 1)
+(run-at-time "10 sec" nil (lambda () (setq inhibit-message nil)))
 
 ;;;;;;;; Helpers
 (defun set-exec-path-from-shell-PATH ()
@@ -33,6 +37,7 @@ apps are not started from a shell."
 (use-package emacs
 	:diminish auto-revert-mode
 	:ensure nil
+	:defer nil
 	:config
 
 	(setenv "PATH" (concat (getenv "PATH") ":/opt/homebrew/bin"))
@@ -56,12 +61,19 @@ apps are not started from a shell."
 	(blink-cursor-mode 0)
 	(tooltip-mode 0)
 	(scroll-bar-mode 0)
+	;; But add column number to the modeline please!
+	(column-number-mode +1)
 
 	(set-face-attribute 'mode-line nil :box nil)
 	(set-face-attribute 'mode-line-inactive nil :box nil)
 
 	;; Enable mouse in terminal
 	(xterm-mouse-mode 1)
+
+	(defun display-startup-echo-area-message ()
+		()
+		;;(message "")
+		)
 
 	(setq
 	 ;; No need for the default startup screen.
@@ -129,10 +141,26 @@ apps are not started from a shell."
 	(unless (eq system-type 'windows-nt)
 		(set-exec-path-from-shell-PATH)))
 
+(use-package files
+	:ensure nil
+	:config
+	(setq confirm-kill-processes nil
+				create-lockfiles nil
+				make-backup-files nil))
+
+;; Not stock Emacs, but load this asap
+(use-package exec-path-from-shell
+	:ensure t
+	:defer nil
+	:config
+	(when (memq window-system '(mac ns x))
+		(exec-path-from-shell-initialize)))
+
 ;;;;;;;; Folds
 
 (use-package hs-minor-mode
 	:ensure nil
+	:defer nil
 	:hook (prog-mode . hs-minor-mode))
 
 ;;;;;;;; General
@@ -140,6 +168,7 @@ apps are not started from a shell."
 ;; Enable evil vi bindings
 (use-package evil
 	:ensure t
+	:defer nil
 	:init
 	(setq evil-undo-system 'undo-redo)
 	(evil-mode)
@@ -147,15 +176,21 @@ apps are not started from a shell."
 
 ;; Useful to remember keybinds
 (use-package which-key
+	:ensure t
 	:diminish which-key-mode
+	:defer nil
 	:init
 	(which-key-mode)
-	(which-key-setup-minibuffer)
+	;;(which-key-setup-minibuffer) ; used previously
+	;;(which-key-setup-side-window-bottom) ; default
 	:config
 	(setq which-key-idle-delay 0.5))
 
 (use-package general
+	:ensure t
+	:defer nil
 	:init
+
 	;; Global keybinds
 	(general-define-key
 	 :states '(normal visual motion)
@@ -177,24 +212,17 @@ apps are not started from a shell."
 
 ;; Emacs native terminal, with decent behaviour and speed
 (use-package eat
-	:ensure t)
+	:ensure t
+	:defer t)
 
-(use-package magit)
-
-(use-package simple
-	:ensure nil
-	:config (column-number-mode +1))
-
-(use-package files
-	:ensure nil
-	:config
-	(setq confirm-kill-processes nil
-				create-lockfiles nil
-				make-backup-files nil))
+(use-package magit
+	:ensure t
+	:defer t)
 
 (use-package dired-sidebar
-	:bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
 	:ensure t
+	:defer t
+	:bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
 	:commands (dired-sidebar-toggle-sidebar)
 	:init
 	(add-hook 'dired-sidebar-mode-hook
@@ -211,6 +239,8 @@ apps are not started from a shell."
 	(setq dired-sidebar-use-custom-font t))
 
 (use-package vertico
+	:ensure t
+	:defer nil
 	:custom
 	(vertico-count 10)
 	(vertico-resize nil)
@@ -218,8 +248,9 @@ apps are not started from a shell."
 	(vertico-mode))
 
 (use-package vertico-directory
+	:ensure nil ; Included with vertico package
+	:defer nil
 	:after vertico
-	:ensure nil
 	:demand
 	;; More convenient directory navigation commands
 	:bind (:map vertico-map
@@ -230,18 +261,16 @@ apps are not started from a shell."
 	:hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
 (use-package orderless
+	:ensure t
+	:defer nil
 	:custom
 	(completion-styles '(orderless))
 	;;(orderless-matching-styles '(orderless-flex))
 	(orderless-matching-styles '(orderless-literal)))
 
-(use-package exec-path-from-shell
-	:ensure t
-	:config
-	(when (memq window-system '(mac ns x))
-		(exec-path-from-shell-initialize)))
-
 (use-package delight
+	:ensure t
+	:defer nil
 	:config
 	(delight 'eldoc-mode nil "eldoc")
 	(delight 'lispyville-mode nil "lispyville")
@@ -252,31 +281,34 @@ apps are not started from a shell."
 	(delight 'company-mode nil "company"))
 
 (use-package pinentry
+	:ensure t
+	:defer nil
 	:config
 	(setq epg-pinentry-mode 'loopback)
 	(pinentry-start))
 
 (use-package epa
 	:ensure nil
+	:defer 1
 	:config
 	(epa-file-enable))
 
-(use-package pass)
+(use-package pass
+	:ensure t
+	:defer t)
 
 ;;;;;;;; General Programming
 
-(use-package elec-pair
-	:ensure nil
-	:hook (prog-mode . electric-pair-mode))
-
 (use-package whitespace
 	:ensure nil
+	:defer nil
 	:config (defun clean-whitespace-in-prog-buffers ()
 						(when (derived-mode-p major-mode)
 							(whitespace-cleanup)))
 	:hook (before-save . clean-whitespace-in-prog-buffers))
 
 (use-package company
+	:ensure t
 	:hook (prog-mode . company-mode)
 	:config
 	(setq company-minimum-prefix-length 1
@@ -295,41 +327,38 @@ apps are not started from a shell."
 	(define-key company-active-map (kbd "<tab>") 'company-complete-selection)
 	(define-key company-active-map (kbd "C-<tab>") 'company-complete-common))
 
-(use-package flycheck
-	:config
-	(global-flycheck-mode +1)
-	;;(setq flycheck-check-syntax-automatically '(save mode-enable))
-	(setq flycheck-highlighting-mode 'lines))
+;; (use-package flycheck
+;;	:ensure t
+;;	:defer nil
+;;	:config
+;;	(global-flycheck-mode +1)
+;;	;;(setq flycheck-check-syntax-automatically '(save mode-enable))
+;;	(setq flycheck-highlighting-mode 'lines))
 
-(use-package flycheck-inline
-	:config
-	(with-eval-after-load 'flycheck
-		(add-hook 'flycheck-mode-hook #'flycheck-inline-mode))
-	(setq flycheck-display-errors-delay 0))
+;; (use-package flycheck-inline
+;;	:hook (flycheck-mode flycheck-inline-mode)
+;;	:custom (flycheck-display-errors-delay 0))
 
-(use-package flycheck-eglot
-	:ensure t
-	:after (flycheck eglot)
-	:custom (flycheck-eglot-exclusive nil)
-	:config
-	(global-flycheck-eglot-mode 1))
-
-(use-package projectile
-	;;:hook (prog-mode . projectile-mode)
-	:config
-	(define-key projectile-mode-map (kbd "<f5>") 'projectile-compile-project)
-	(define-key projectile-mode-map (kbd "<f6>") 'projectile-run-project))
+;; (use-package flycheck-eglot
+;;	:ensure t
+;;	:after (flycheck eglot)
+;;	:custom (flycheck-eglot-exclusive nil)
+;;	:config
+;;	(global-flycheck-eglot-mode 1))
 
 (use-package centered-cursor-mode
+	:ensure t
 	:hook (prog-mode . centered-cursor-mode)
 	:config (setq ccm-recenter-at-end-of-file t
 								ccm-recenter-end-of-file t))
 
 (use-package rainbow-delimiters
-	:config
-	(global-set-key "\C-cr" 'rainbow-delimiters-mode))
+	:ensure t
+	:defer t
+	:bind ("\C-cr" . rainbow-delimiters-mode))
 
 (use-package aggressive-indent
+	:ensure t
 	:config
 	(global-set-key "\C-ci" 'aggressive-indent-mode)
 	:hook ((prog-mode . aggressive-indent-mode)
@@ -339,47 +368,48 @@ apps are not started from a shell."
 
 (use-package eglot
 	:ensure nil
-	:hook ((eglot-managed-mode . mp-eglot-eldoc))
-	:config
-	(global-set-key "\C-cl" 'eglot)
-	(add-hook 'haskell-mode-hook 'eglot-ensure)
-	(add-hook 'clojure-mode-hook 'eglot-ensure)
-	(add-hook 'scala-mode-hook 'eglot-ensure)
-	(add-hook 'kotlin-mode-hook 'eglot-ensure)
-	(setq eglot-events-buffer-size 0)
-	(setq-default eglot-workspace-configuration
-								'((haskell
-									 (plugin
-										(stan
-										 (globalOn . :json-false))))))  ;; disable stan
+	:defer t
+	:hook ((eglot-managed-mode . mp-eglot-eldoc)
+				 (haskell-mode . eglot-ensure)
+				 (clojure-mode . eglot-ensure)
+				 (scala-mode . eglot-ensure)
+				 (kotlin-mode . eglot-ensure))
+	:bind ("\C-cl" . eglot)
 	:custom
 	;; shutdown language server after closing last file
 	(eglot-autoshutdown t)
 	;; allow edits without confirmation
-	(eglot-confirm-server-initiated-edits nil))
+	(eglot-confirm-server-initiated-edits nil)
+	;; Set buffer size to 0 for to not impact performance
+	;;((plist-get eglot-events-buffer-config :size) 0)
+	;; disable stan
+	(eglot-workspace-configuration
+	 '((haskell
+			(plugin
+			 (stan
+				(globalOn . :json-false)))))))
 
 (use-package eldoc
 	:ensure nil
+	:defer t
+	:hook ((emacs-lisp-mode . eldoc-mode)
+				 (lisp-interaction-mode . eldoc-mode)
+				 (ielm-mode . eldoc-mode))
 	:config
 	;; When eldoc buffer is open, don't show it in minibuffer anymore.
 	(setq eldoc-echo-area-prefer-doc-buffer t)
 	(setq eldoc-documentation-strategy 'eldoc-documentation-compose-eagerly)
-	(add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
-	(add-hook 'lisp-interaction-mode-hook 'eldoc-mode)
-	(add-hook 'ielm-mode-hook 'eldoc-mode)
 
 	(add-to-list 'display-buffer-alist
 							 '("^\\*eldoc for" display-buffer-at-bottom
 								 (window-height . 10))))
 
-;; EMacs Refactoring system
-(use-package emr
-	:ensure t
-	:bind (("M-RET" . emr-show-refactor-menu)))
-
 ;;;;;;;; Writing
 
 (use-package markdown-mode
+	:ensure t
+	:defer t
+	:mode "\\.md\\'"
 	:init
 	(add-hook 'markdown-mode-hook (lambda ()
 																	(defvar buffer-face-mode-face
@@ -406,8 +436,10 @@ apps are not started from a shell."
 	(setq markdown-header-scaling t)
 	(setq markdown-inline-image-overlays t))
 
+;; TODO: Use-package-ify
 (use-package org
 	:ensure nil
+	:defer nil
 	:config
 	;; Use the Quattro font only for org buffers
 	(add-hook 'org-mode-hook
@@ -451,7 +483,7 @@ apps are not started from a shell."
 	;;(add-hook 'org-mode-hook 'visual-line-mode)
 
 	;; Follow links in same buffer
-	(setf (cdr (assoc 'file org-link-frame-setup)) 'find-file)
+	;;(setf (cdr (assoc 'file org-link-frame-setup)) 'find-file)
 
 	;; Add all the events Emacs knows about
 	(defvar org-agenda-include-diary nil)
@@ -493,7 +525,7 @@ apps are not started from a shell."
 
 	(defvar org-capture-templates
 		'(("l" "Work Log Entry"
-			 entry (file+datetree "~/org/work-log.org")
+			 entry (file+olp+datetree "~/org/work-log.org")
 			 "* %?"
 			 :tree-type week
 			 :empty-lines 0)
@@ -527,9 +559,13 @@ apps are not started from a shell."
 														 (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
 
 (use-package org-protocol
-	:ensure nil)
+	:ensure nil
+	:defer nil)
 
+;; TODO: Use-package-ify
 (use-package org-roam
+	:ensure t
+	:defer 2
 	:config
 	(ensure-directory-exists "~/org/roam")
 	(setq org-roam-directory (file-truename "~/org/roam"))
@@ -562,52 +598,10 @@ apps are not started from a shell."
 
 	(org-roam-db-autosync-mode))
 
+
+;; TODO: Use-package-ify
 (use-package org-roam-ui
-	:config
-	(setq org-roam-ui-sync-theme t
-				org-roam-ui-follow t
-				org-roam-ui-update-on-save t)
-
-	(general-define-key
-	 :states '(normal)
-	 :keymaps 'override
-	 :prefix "SPC"
-	 "R" 'org-roam-ui-open))
-
-(use-package org-roam
-	:config
-	(ensure-directory-exists "~/org/roam")
-	(setq org-roam-directory (file-truename "~/org/roam"))
-
-	(general-define-key
-	 :states '(normal)
-	 :keymaps 'override
-	 :prefix "SPC"
-	 "r" 'org-roam-node-find)
-
-	(general-define-key
-	 :states '(normal)
-	 :keymaps 'org-mode-map
-	 :prefix ","
-	 "r" 'org-roam-node-insert)
-
-	(setq org-roam-capture-templates
-				'(("d" "default" plain "%?"
-					 :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-															"#+title: ${title}\n")
-					 :unnarrowed t)
-					("w" "work" plain "%?"
-					 :target (file+head "work/%<%Y%m%d%H%M%S>-${slug}.org"
-															"#+title: ${title}\n")
-					 :unnarrowed t)
-					("P" "personal" plain "%?"
-					 :target (file+head "personal/%<%Y%m%d%H%M%S>-${slug}.org"
-															"#+title: ${title}\n")
-					 :unnarrowed t)))
-
-	(org-roam-db-autosync-mode))
-
-(use-package org-roam-ui
+	:after (org-roam)
 	:config
 	(setq org-roam-ui-sync-theme t
 				org-roam-ui-follow t
@@ -620,14 +614,16 @@ apps are not started from a shell."
 	 "R" 'org-roam-ui-open))
 
 (use-package evil-org
+	:ensure t
+	:defer t
 	:diminish evil-org-mode
 	:after org
-	:config
-	(add-hook 'org-mode-hook 'evil-org-mode)
-	(add-hook 'evil-org-mode-hook
-						(lambda () (evil-org-set-key-theme))))
+	:hook ((org.mode . evil-org-mode)
+				 (evil-org-mode . (lambda () (evil-org-set-key-theme)))))
 
 (use-package org-jira
+	:ensure t
+	:defer t
 	:config
 	(setq jiralib-url "https://jira.ontwikkel.local")
 	(setq org-jira-working-dir (ensure-directory-exists "~/.org/jira"))
@@ -635,10 +631,11 @@ apps are not started from a shell."
 	(setq jiralib-token
 				(cons "Authorization"
 							(concat "Bearer " (auth-source-pick-first-password
-																 :host "jira.ontwikkel.local"))))
-	)
+																 :host "jira.ontwikkel.local")))))
 
+;; TODO: Use-package-ify
 (use-package org-download
+	:defer 5
 	:config
 
 	;; Drag-and-drop to `dired`
@@ -648,6 +645,8 @@ apps are not started from a shell."
 ;;;;;;;; Lisp
 
 (use-package lispyville
+	:ensure t
+	:defer t
 	:hook ((emacs-lisp-mode . lispyville-mode)
 				 (clojure-mode . lispyville-mode)
 				 (scheme-mode . lispyville-mode))
@@ -655,8 +654,8 @@ apps are not started from a shell."
 
 	;; https://github.com/noctuid/lispyville/issues/314
 	;; https://github.com/abo-abo/lispy/issues/305
-	(setq lispy-left "[([{\"]")
-	(setq lispy-right "[])}\"]")
+	(setq lispy-left "[([{]")
+	(setq lispy-right "[])}]")
 
 	(with-eval-after-load 'lispyville
 		(lispyville-set-key-theme
@@ -665,22 +664,38 @@ apps are not started from a shell."
 			 slurp/barf-cp
 			 additional))))
 
+(use-package elec-pair
+	:ensure nil
+	:hook (lispyville-mode . electric-pair-mode))
+
 (use-package slime
+	:ensure t
+	:defer 20
+	;;:hook ((lisp-mode . slime-mode))
+	:mode "\\.cl\\'"
 	:init
-	(add-hook 'lisp-mode-hook (lambda () (slime-mode t)))
-	(slime-setup '(slime-fancy slime-company slime-quicklisp slime-asdf))
+	;;(slime-setup '(slime-fancy slime-company slime-quicklisp slime-asdf))
 	:config
-	(setq inferior-lisp-program "sbcl"))
+	;;(setq inferior-lisp-program "sbcl"))
+	)
 
 (use-package slime-company
+	:ensure t
+	:defer t
 	:after (slime company)
 	:config
 	(setq slime-company-completion 'fuzzy))
 
-(use-package clojure-mode)
+(use-package clojure-mode
+	:ensure t
+	:defer t
+	:mode "\\.clj\\'")
+
 (use-package cider
+	:ensure t
+	:defer t
+	:hook ((clojure-mode . cider-mode))
 	:config
-	(add-hook 'clojure-mode-hook #'cider-mode)
 
 	(general-define-key
 	 :states 'normal
@@ -702,54 +717,79 @@ apps are not started from a shell."
 	(setq cider-eldoc-display-context-dependent-info t))
 
 (use-package inf-clojure
+	:after (clojure-mode)
 	:init
 	(defun cljs-node-repl ()
 		(interactive)
 		(inf-clojure "clj -M -m cljs.main -co build.edn -re node -r")))
 
 (use-package paredit
-	:config
-	(add-hook 'clojure-mode-hook 'paredit-mode))
+	:hook ((lisp-mode . enable-paredit-mode)))
 
-(use-package geiser)
-(use-package geiser-guile)
-(use-package geiser-chicken)
-(use-package racket-mode)
+(use-package geiser
+	:ensure t
+	:defer t)
+(use-package geiser-guile
+	:ensure t
+	:mode "\\.guile.scm\\'"
+	:interpreter "guile")
+(use-package geiser-chicken
+	:ensure t
+	:mode "\\.chicken.scm\\'"
+	:interpreter "chicken")
+(use-package racket-mode
+	:ensure t
+	:mode "\\.rkt\\'")
+
 (use-package emacs
 	:ensure nil
-	:config
-	(add-hook 'emacs-lisp-mode-hook (lambda () (evil-close-folds))))
+	:hook ((emacs-lisp-mode . (lambda () (evil-close-folds)))))
 
 ;;;;;;;; Programming language specific
 
 (use-package treesit-auto
+	:ensure t
+	:defer nil
 	:custom
 	(treesit-auto-install 'prompt)
 	(treesit-auto-add-to-auto-mode-alist 'all)
 	(global-treesit-auto-mode))
 
 (use-package plantuml-mode
+	:ensure t
+	:defer t
+	:mode "\\.plantuml\\'"
 	:custom
 	(add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode))
 	(add-to-list 'org-src-lang-modes '("plantuml" . plantuml))
-	(org-babel-do-load-languages
-	 'org-babel-load-languages
-	 '((plantuml . t)))
+	;;(org-babel-do-load-languages
+	;; 'org-babel-load-languages
+	;; '((plantuml . t)))
 	:config
 	(setq plantuml-default-exec-mode 'exec))
 
 (use-package sass-mode
 	:mode "\\.sass?$"
 	:custom
-	(flycheck-mode nil)
-	)
+	(flycheck-mode nil))
 
-(use-package poly-ansible)
-(use-package ansible-doc)
-(use-package company-ansible)
+(use-package poly-ansible
+	:ensure t
+	:defer t
+	:mode "\\.yml\\'")
 
-(use-package kotlin-mode)
+(use-package ansible-doc
+	:ensure t
+	:hook ((poly-ansible-mode . ansible-doc-mode)))
+
+(use-package company-ansible
+	:after (poly-ansible company))
+
+(use-package kotlin-mode
+	:mode "\\.kt\\'")
+
 (use-package groovy-mode
+	:mode "\\.groovy\\'"
 	:config
 	(setq groovy-indent-offset 2
 				indent-tabs-mode 0
@@ -758,8 +798,11 @@ apps are not started from a shell."
 				truncate-partial-width-windows 1)
 	(indent-tabs-mode nil))
 
-(use-package rustic)
-(use-package go-mode)
+(use-package rustic
+	:mode "\\.rs\\'")
+
+(use-package go-mode
+	:mode "\\.go\\'")
 
 (provide 'config)
 ;;; config.el ends here
