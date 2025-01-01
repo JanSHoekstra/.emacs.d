@@ -139,7 +139,10 @@ apps are not started from a shell."
 		(setenv "HOME" (format "C:/Users/%s/" user-login-name)))
 
 	(when (eq system-type 'darwin)
-		(setq-default explicit-shell-file-name "/opt/homebrew/bin/bash"))
+		(let ((shell "/opt/homebrew/bin/bash"))
+			(setenv "SHELL" shell)
+			(setenv "ESHELL" shell)
+			(setq-default explicit-shell-file-name shell)))
 
 	(unless (eq system-type 'windows-nt)
 		(set-exec-path-from-shell-PATH)))
@@ -150,6 +153,11 @@ apps are not started from a shell."
 	(setq confirm-kill-processes nil
 				create-lockfiles nil
 				make-backup-files nil))
+(use-package emacs
+	:ensure nil
+	:defer nil
+	:config
+	(add-to-list 'Info-directory-list "/opt/homebrew/share/info"))
 
 ;; Not stock Emacs, but load this asap
 (use-package exec-path-from-shell
@@ -217,7 +225,9 @@ apps are not started from a shell."
 ;; Emacs native terminal, with decent behaviour and speed
 (use-package eat
 	:ensure t
-	:defer t)
+	:defer t
+	:hook (eat-mode . (lambda () (evil-emacs-state 1)))
+	)
 
 (use-package magit
 	:ensure t
@@ -313,7 +323,8 @@ apps are not started from a shell."
 
 (use-package company
 	:ensure t
-	:hook (prog-mode . company-mode)
+	:hook ((prog-mode . company-mode)
+				 (ielm . company-mode))
 	:config
 	(setq company-minimum-prefix-length 1
 				company-idle-delay 0.1
