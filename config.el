@@ -41,19 +41,22 @@ apps are not started from a shell."
 	:config
 
 	(setenv "PATH" (concat (getenv "PATH") ":/opt/homebrew/bin"))
-	(if (not (eq system-type 'windows-nt))
-			(progn
-				(set-face-attribute 'default
-														nil
-														:family "iA Writer Mono S"
-														:height 120)
-				(set-face-attribute 'mode-line
-														nil
-														:family "iA Writer Quattro S"))
+
+	(cond
+	 ((and (find-font (font-spec :name "iA Writer Mono S"))
+				 (find-font (font-spec :name "iA Writer Quattro S")))
+		(set-face-attribute 'default
+												nil
+												:family "iA Writer Mono S"
+												:height 120)
+		(set-face-attribute 'mode-line
+												nil
+												:family "iA Writer Quattro S"))
+	 ((find-font (font-spec :name "Consolas"))
 		(set-face-attribute 'default
 												nil
 												:family "Consolas"
-												:height 140))
+												:height 120)))
 
 	;; Disable UI nonsense.
 	(tool-bar-mode 0)
