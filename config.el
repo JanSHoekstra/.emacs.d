@@ -64,12 +64,14 @@ apps are not started from a shell."
 	;; But add column number to the modeline please!
 	(column-number-mode +1)
 
+	;; The mode line box looks bad.
 	(set-face-attribute 'mode-line nil :box nil)
 	(set-face-attribute 'mode-line-inactive nil :box nil)
 
-	;; Enable mouse in terminal
+	;; Enable mouse in terminal.
 	(xterm-mouse-mode 1)
 
+	;; Don't show the startup message from Emacs.
 	(defun display-startup-echo-area-message ()
 		()
 		;;(message "")
@@ -94,6 +96,10 @@ apps are not started from a shell."
 	 mac-command-modifier 'meta
 	 ns-command-modifier 'meta)
 
+	;; Allows Command to work like Meta on MacOS
+	(set-keyboard-coding-system nil)
+
+	;; Use 2 spaces, no tabs.
 	(setq-default indent-tabs-mode 0
 								tab-width 2
 								truncate-lines 1
@@ -106,7 +112,7 @@ apps are not started from a shell."
 				(select-window (active-minibuffer-window))
 			(error "Minibuffer is not active")))
 
-	(global-set-key "\C-cm" 'switch-to-minibuffer) ;; Bind to `C-c o'
+	(global-set-key "\C-cm" 'switch-to-minibuffer)
 
 	;; Launch frames as maximized
 	(add-to-list 'default-frame-alist '(fullscreen . maximized))
@@ -144,8 +150,9 @@ apps are not started from a shell."
 			(setenv "ESHELL" shell)
 			(setq-default explicit-shell-file-name shell)))
 
-	(unless (eq system-type 'windows-nt)
-		(set-exec-path-from-shell-PATH)))
+	;; (unless (eq system-type 'windows-nt)
+	;;	(set-exec-path-from-shell-PATH))
+	)
 
 (use-package files
 	:ensure nil
@@ -159,19 +166,25 @@ apps are not started from a shell."
 	:config
 	(add-to-list 'Info-directory-list "/opt/homebrew/share/info"))
 
-;; Not stock Emacs, but load this asap
 (use-package exec-path-from-shell
 	:ensure t
 	:defer nil
 	:config
-	(when (memq window-system '(mac ns x))
-		(exec-path-from-shell-initialize)
-		(when (eq system-type 'darwin)
-			(exec-path-from-shell-copy-env "SSH_AGENT_PID")
-			(exec-path-from-shell-copy-env "SSH_AUTH_SOCK"))))
+	;;(setq exec-path-from-shell-debug t)
+
+	(setq exec-path-from-shell-variables '())
+	;; Take the following variables from the shell, we need them!
+	(dolist (var '("SSH_AUTH_SOCK")) ;; "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH"
+		(add-to-list 'exec-path-from-shell-variables var))
+
+	;; Non-interactive shells are generally faster. So remove "-i" from the default arg list.
+	;;(setq exec-path-from-shell-arguments '("-l"))
+
+	;; We only need to start a shell if we don't run Emacs from a shell already (and get the vars from there).
+	(when (or (daemonp) (memq window-system '(mac ns x)))
+		(exec-path-from-shell-initialize)))
 
 ;;;;;;;; Folds
-
 (use-package hs-minor-mode
 	:ensure nil
 	:defer nil
@@ -183,9 +196,9 @@ apps are not started from a shell."
 (use-package evil
 	:ensure t
 	:defer nil
+	:hook (ielm-mode . (lambda () (evil-emacs-state 1)))
 	:init
 	(setq evil-undo-system 'undo-redo)
-	(setq evil-want-minibuffer t)
 	(evil-mode)
 	(global-set-key (kbd "<escape>") 'keyboard-escape-quit))
 
@@ -201,19 +214,83 @@ apps are not started from a shell."
 	:config
 	(setq which-key-idle-delay 0.5))
 
+(defun follow-cursor-toggle ()
+	"Toggles both centered-cursor-mode and pixel-scroll-precision-mode
+So that only one of the two is active at any time.
+Also decreases the amount of horizontal scrolling when following is disabled."
+	(interactive)
+	(cond
+	 (centered-cursor-mode
+		(centered-cursor-mode -1)
+		(pixel-scroll-precision-mode t)
+		(setq hscroll-margin 0))
+	 (t (centered-cursor-mode t)
+			(pixel-scroll-precision-mode -1)
+			(setq hscroll-margin 9999))))
+
 (use-package general
 	:ensure t
 	:defer nil
 	:init
+	;; Config based on https://github.com/noctuid/general.el,
+	;; https://alexforsale.github.io/posts/emacs-general/,
+	;; and https://github.com/noctuid/general.el/issues/126
+
+	(general-create-definer evil-leader
+		:states '(normal visual motion) ;; insert emacs
+		:keymaps 'override
+		:non-normal-prefix "S-SPC"
+		:prefix "SPC")
+
+	(general-create-definer emacs-leader
+		:prefix "S-SPC"
+		:keymaps 'override)
+
+	(defmacro zgeneral-leader (&rest args)
+		"Define for both default leader and global leader."
+		(declare (indent defun))
+		`(progn
+			 (evil-leader
+				 ,@args)
+			 (emacs-leader
+				 ,@args)))
 
 	;; Global keybinds
-	(general-define-key
-	 :states '(normal visual motion)
-	 :keymaps 'override
-	 :prefix "SPC"
-	 "1" 'delete-other-windows
-	 "SPC" 'execute-extended-command
-	 "c" 'comment-or-uncomment-region)
+	;; (general-define-key
+	;;  :states '(emacs normal visual motion insert)
+	;;  :keymaps 'override
+	;;  :prefix "SPC"
+	;;  :non-normal-prefix "S-SPC"
+	;;  "1" 'delete-other-windows
+	;;  "SPC" 'execute-extended-command
+	;;  "c" 'comment-or-uncomment-region
+	;;  "b" '(:ignore t :wk "bookmark")
+	;;  "bs" 'bookmark-set-no-overwrite
+	;;  "bj" 'bookmark-jump
+	;;  "bl" 'bookmark-bmenu-list
+	;;  "m" '(:ignore t :wk "mouse")
+	;;  "mm" 'follow-cursor-toggle)
+
+	(zgeneral-leader
+		"1" 'delete-other-windows
+		"SPC" 'execute-extended-command
+		"c" 'comment-or-uncomment-region
+		"b" '(:ignore t :wk "bookmark")
+		"bs" 'bookmark-set-no-overwrite
+		"bj" 'bookmark-jump
+		"bl" 'bookmark-bmenu-list
+		"m" '(:ignore t :wk "mouse")
+		"mm" 'follow-cursor-toggle)
+
+
+	;; (general-define-key
+	;;  :states
+	;;  "SPC" (general-key "S-SPC" :state 'emacs))
+
+	;; (general-define-key
+	;;  :prefix "S-SPC"
+	;;  "c" 'comment-or-uncomment-region)
+
 	(general-define-key
 	 :states 'normal
 	 :keymaps 'org-mode-map
@@ -229,8 +306,7 @@ apps are not started from a shell."
 (use-package eat
 	:ensure t
 	:defer t
-	:hook (eat-mode . (lambda () (evil-emacs-state 1)))
-	)
+	:hook (eat-mode . (lambda () (evil-emacs-state 1))))
 
 (use-package magit
 	:ensure t
@@ -472,13 +548,10 @@ apps are not started from a shell."
 	(global-set-key "\C-ca" 'org-agenda)
 	(global-set-key "\C-cl" 'org-store-link)
 
-	(general-define-key
-	 :states '(normal)
-	 :keymaps 'override
-	 :prefix "SPC"
-	 ;;"c" 'org-capture
-	 "a" 'org-agenda
-	 "o" 'org-open-at-point-global)
+	(zgeneral-leader
+		;;"c" 'org-capture
+		"a" 'org-agenda
+		"o" 'org-open-at-point-global)
 
 	(general-define-key
 	 :states 'normal
@@ -588,11 +661,8 @@ apps are not started from a shell."
 	(ensure-directory-exists "~/org/roam")
 	(setq org-roam-directory (file-truename "~/org/roam"))
 
-	(general-define-key
-	 :states '(normal)
-	 :keymaps 'override
-	 :prefix "SPC"
-	 "r" 'org-roam-node-find)
+	(zgeneral-leader
+		"r" 'org-roam-node-find)
 
 	(general-define-key
 	 :states '(normal)
@@ -625,11 +695,8 @@ apps are not started from a shell."
 				org-roam-ui-follow t
 				org-roam-ui-update-on-save t)
 
-	(general-define-key
-	 :states '(normal)
-	 :keymaps 'override
-	 :prefix "SPC"
-	 "R" 'org-roam-ui-open))
+	(zgeneral-leader
+		"R" 'org-roam-ui-open))
 
 (use-package evil-org
 	:ensure t
@@ -742,7 +809,12 @@ apps are not started from a shell."
 		(inf-clojure "clj -M -m cljs.main -co build.edn -re node -r")))
 
 (use-package paredit
-	:hook ((lisp-mode . enable-paredit-mode)))
+	:ensure t
+	:hook ((lisp-mode . paredit-mode)
+				 (emacs-lisp-mode . paredit-mode)
+				 (clojure-mode . paredit-mode)
+				 (racket-mode . paredit-mode)
+				 (scheme-mode . paredit-mode)))
 
 (use-package geiser
 	:ensure t
@@ -793,15 +865,23 @@ apps are not started from a shell."
 
 (use-package poly-ansible
 	:ensure t
-	:defer t
-	:mode "\\.yml\\'")
+	:defer nil
+	:hook (yaml-mode . poly-ansible-mode)
+	:config
+	(general-define-key
+	 :states 'normal
+	 :keymaps 'yaml-mode-map
+	 :prefix ","
+	 "d" 'ansible-decrypt-buffer
+	 "e" 'ansible-encrypt-buffer)
+	)
 
 (use-package ansible-doc
 	:ensure t
 	:hook ((poly-ansible-mode . ansible-doc-mode)))
 
 (use-package company-ansible
-	:after (poly-ansible company))
+	:after (poly-ansible-mode company-mode))
 
 (use-package kotlin-mode
 	:mode "\\.kt\\'")
