@@ -51,7 +51,8 @@ apps are not started from a shell."
                         :height 120)
     (set-face-attribute 'mode-line
                         nil
-                        :family "iA Writer Quattro S"))
+                        :family "iA Writer Quattro S")
+    (set-face-attribute 'mode-line))
    ((find-font (font-spec :name "Consolas"))
     (set-face-attribute 'default
                         nil
@@ -171,7 +172,7 @@ apps are not started from a shell."
 
   (setq exec-path-from-shell-variables '())
   ;; Take the following variables from the shell, we need them!
-  (dolist (var '("SSH_AUTH_SOCK")) ;; "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH"
+  (dolist (var '("SSH_AUTH_SOCK" "PATH")) ;; "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH"
     (add-to-list 'exec-path-from-shell-variables var))
 
   ;; Non-interactive shells are generally faster. So remove "-i" from the default arg list.
@@ -220,7 +221,7 @@ Also decreases the amount of horizontal scrolling when following is disabled."
    (centered-cursor-mode
     (centered-cursor-mode -1)
     (pixel-scroll-precision-mode t)
-    (setq hscroll-margin 0))
+    (setq hscroll-margin 10))
    (t (centered-cursor-mode t)
       (pixel-scroll-precision-mode -1)
       (setq hscroll-margin 9999))))
@@ -533,13 +534,14 @@ Also decreases the amount of horizontal scrolling when following is disabled."
   :defer nil
   :config
   ;; Use the Quattro font only for org buffers
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (defvar buffer-face-mode-face
-                '(:family "iA Writer Quattro V"))
-              (buffer-face-mode)
-              (visual-line-mode)
-              (org-indent-mode)))
+  (if (find-font (font-spec :name "iA Writer Quattro V"))
+      (add-hook 'org-mode-hook
+                (lambda ()
+                  (defvar buffer-face-mode-face
+                    '(:family "iA Writer Quattro V"))
+                  (buffer-face-mode)
+                  (visual-line-mode)
+                  (org-indent-mode))))
 
   ;; Always be able to open the agenda through it's shortcut
   (global-set-key "\C-ca" 'org-agenda)
@@ -639,12 +641,23 @@ Also decreases the amount of horizontal scrolling when following is disabled."
    `(org-level-4 ((t (:height 1.1))))
    `(org-level-3 ((t (:height 1.2))))
    `(org-level-2 ((t (:height 1.3))))
-   `(org-level-1 ((t (:height 1.5)))) ;; :box (:color ,(face-attribute 'default :background) :line-width (0 . 10))))))
+   `(org-level-1 ((t (:height 1.5))))
    `(org-document-title ((t (:height 1.6 :underline nil)))))
 
   (font-lock-add-keywords 'org-mode
                           '(("^ *\\([-]\\) "
-                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
+  (setq org-babel-clojure-backend 'cider)
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (shell . t)
+     (clojure . t)
+     (python . t)))
+
+  (setq org-src-preserve-indentation t))
 
 (use-package org-protocol
   :ensure nil
